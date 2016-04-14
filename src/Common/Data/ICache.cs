@@ -1,11 +1,12 @@
-﻿/****************************************************************************/
+/****************************************************************************/
 /*                                                                          */
-/*    The Mondo Libraries  							                        */
+/*    The Mondo Libraries  	                                                */
 /*                                                                          */
-/*        Namespace: Mondo.Common							                */
-/*             File: ICache.cs					    		                */
-/*        Class(es): ICache				         		                    */
-/*          Purpose: Generic cache interface                                */
+/*      Namespace: Mondo.Common	                                            */
+/*           File: ICache.cs                                                */
+/*      Class(es): ICache, ICacheDependency, FileDependency, BaseCache,     */
+/*                    CacheExtensions                                       */
+/*        Purpose: Generic cache interface and generic cache implmentation  */
 /*                                                                          */
 /*  Original Author: Jim Lightfoot                                          */
 /*    Creation Date: 29 Nov 2015                                            */
@@ -18,6 +19,7 @@
 /****************************************************************************/
 
 using System;
+using System.Threading.Tasks;
 using System.Collections.Generic;
 
 namespace Mondo.Common
@@ -26,14 +28,13 @@ namespace Mondo.Common
     /****************************************************************************/
     public interface ICache
     {
-        object Get(string strKey);
-        string GetString(string strKey);
+        object Get(string key);
 
-        void   Add(string strKey, object objToAdd);
-        void   Add(string strKey, object objToAdd, DateTime dtExpires, ICacheDependency dependency = null);
-        void   Add(string strKey, object objToAdd, TimeSpan tsExpires, ICacheDependency dependency = null);
+        void   Add(string key, object objToAdd);
+        void   Add(string key, object objToAdd, DateTime dtExpires, ICacheDependency dependency = null);
+        void   Add(string key, object objToAdd, TimeSpan tsExpires, ICacheDependency dependency = null);
 
-        void   Remove(string strKey);
+        void   Remove(string key);
     }
 
     /****************************************************************************/
@@ -63,16 +64,55 @@ namespace Mondo.Common
     public abstract class BaseCache : ICache
     {
         /****************************************************************************/
-        public string GetString(string strKey)
+        public abstract object Get(string key);
+        public abstract void   Add(string key, object objToAdd);
+        public abstract void   Add(string key, object objToAdd, DateTime dtExpires, ICacheDependency dependency = null);
+        public abstract void   Add(string key, object objToAdd, TimeSpan tsExpires, ICacheDependency dependency = null);
+        public abstract void   Remove(string key);
+    }
+
+    /****************************************************************************/
+    /****************************************************************************/
+    public static class CacheExtensions 
+    {
+        /****************************************************************************/
+        public static string GetString(this ICache cache, string key)
         {
-            return(Get(strKey).Normalized());
+            return(cache.Get(key).Normalized());
         }
 
         /****************************************************************************/
-        public abstract object Get(string strKey);
-        public abstract void   Add(string strKey, object objToAdd);
-        public abstract void   Add(string strKey, object objToAdd, DateTime dtExpires, ICacheDependency dependency = null);
-        public abstract void   Add(string strKey, object objToAdd, TimeSpan tsExpires, ICacheDependency dependency = null);
-        public abstract void   Remove(string strKey);
+        public delegate T CreateItem<T>();
+
+        /****************************************************************************/
+        public static T Get<T>(this ICache cache, string key, CreateItem<T> fnCreate, DateTime? dtExpires = null, TimeSpan? tsExpires = null, ICacheDependency dependency = null , ILog log = null)
+        {
+            object obj = cache.Get(key);
+
+            if(obj == null)
+            { 
+                obj = fnCreate();
+
+                Task.Run( ()=>
+                {
+                    try
+                    { 
+                        if(dtExpires != null)
+                            cache.Add(key, obj, dtExpires.Value, dependency);
+                        else if(tsExpires != null)
+                            cache.Add(key, obj, tsExpires.Value, dependency);
+                        else
+                            cache.Add(key, obj);
+                    }
+                    catch(Exception ex)
+                    {
+                        if(log != null)
+                            log.WriteError(ex);
+                    }
+                });
+            }
+
+            return((T)obj);
+        }
     }
 }
