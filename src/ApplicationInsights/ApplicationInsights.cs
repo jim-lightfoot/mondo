@@ -1,16 +1,16 @@
-﻿/****************************************************************************/
+/****************************************************************************/
 /*                                                                          */
-/*    The Mondo Libraries  							                        */
+/*    The Mondo Libraries  						    */
 /*                                                                          */
-/*           Module: Mondo.ApplicationInsights							    */
-/*             File: ApplicationInsights.cs								    */
-/*        Class(es): ApplicationInsights						            */
+/*           Module: Mondo.ApplicationInsights				    */
+/*             File: ApplicationInsights.cs				    */
+/*        Class(es): ApplicationInsights				    */
 /*          Purpose: A thin wrapper around Microsoft's Application Insights */
 /*                    API that implements the ILog interface from           */
 /*                      Mondo.Common                                        */
 /*                                                                          */
 /*  Original Author: Jim Lightfoot                                          */
-/*    Creation Date: 22 Aug 2015                                            */
+/*    Creation Date: 22 Mar 2015                                            */
 /*                                                                          */
 /*   Copyright (c) 2015-2016 - Jim Lightfoot, All rights reserved           */
 /*                                                                          */
