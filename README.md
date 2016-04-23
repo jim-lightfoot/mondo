@@ -8,3 +8,6 @@
   
 ## Mondo.Web
   Utility classes for ASP.Net development (including MVC).
+  
+## Mondo.ApplicationInsights
+  A thin wrapper around Microsoft's Application Insights  API that implements the ILog interface from Mondo.Common.
