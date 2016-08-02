@@ -22,6 +22,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Collections.Specialized;
 
 namespace Mondo.Common
@@ -203,6 +204,40 @@ namespace Mondo.Common
         }
 
         /****************************************************************************/
+        public static async Task<MemoryStream> LoadFileStreamAsync(string strFileName)
+        {
+            byte[]       aBuffer   = new byte[kBufferSize];
+            MemoryStream objMemory = new MemoryStream();
+
+            try
+            {
+                using(FileStream fs = new FileStream(strFileName,
+                                                     FileMode.Open, 
+                                                     FileAccess.
+                                                     Read, FileShare.Read,
+                                                     bufferSize: kBufferSize, 
+                                                     useAsync: true))
+                {
+                    int iRead = 0;
+
+                    while((iRead = await fs.ReadAsync(aBuffer, 0, aBuffer.Length)) != 0)
+                    {
+                        objMemory.Write(aBuffer, 0, iRead);
+                    }
+                }
+
+                objMemory.Position = 0;
+
+                return(objMemory);
+            }
+            catch(Exception ex)
+            {
+                objMemory.Dispose();
+                throw ex;
+            }
+        }
+
+        /****************************************************************************/
         public static string LoadFile(string strFileName)
         {
             return(LoadFile(strFileName, false));
@@ -227,6 +262,43 @@ namespace Mondo.Common
             }
 
             return("");
+        }
+        
+        /****************************************************************************/
+        public static async Task<string> LoadFileAsync(string strFileName, bool bThrow = true)
+        {
+            try
+            {
+                using(FileStream fs = new FileStream(strFileName,
+                                                     FileMode.Open, 
+                                                     FileAccess.
+                                                     Read, FileShare.Read,
+                                                     bufferSize: 16384, 
+                                                     useAsync: true))
+                {
+                    StringBuilder sb     = new StringBuilder();
+                    byte[]        buffer = new byte[16384];
+                    int           iRead;
+
+                    while((iRead = await fs.ReadAsync(buffer, 0, buffer.Length)) != 0)
+                    {
+                        string strText = Encoding.UTF8.GetString(buffer, 0, iRead);
+
+                        sb.Append(strText);
+                    }
+
+                    return sb.ToString();
+                }
+            }
+            catch(Exception ex)
+            {
+                cDebug.Capture(ex);
+
+                if(bThrow)
+                    throw;
+            }
+
+            return "";
         }
         
         /****************************************************************************/
