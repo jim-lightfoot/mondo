@@ -427,13 +427,10 @@ namespace Mondo.Common
             if(objType == typeof(double))
                 return(Utility.ToDouble(objValue));
 
-            if(objType == typeof(decimal))
-                return(Utility.ToDecimal(objValue));
-
-           if(objType == typeof(DateTime))
+            if(objType == typeof(DateTime))
                 return(Utility.ToDateTime(objValue));
 
-           if(objType == typeof(Guid))
+            if(objType == typeof(Guid))
                 return(Utility.ToGuid(objValue));
 
             return(objValue);

@@ -18,6 +18,7 @@
 /****************************************************************************/
 
 using System;
+using System.Threading.Tasks;
 
 namespace Mondo.Common
 {
@@ -29,6 +30,7 @@ namespace Mondo.Common
 	public interface IOpenable 
 	{
         void Open();
+        Task OpenAsync();
         void Close();
         bool IsOpen      {get;}
     }
@@ -51,6 +53,12 @@ namespace Mondo.Common
         public virtual void Open()
         {
             ++m_iOpen;
+        }
+
+        /****************************************************************************/
+        public virtual async Task OpenAsync()
+        {
+            Open();
         }
 
         /****************************************************************************/
@@ -86,6 +94,33 @@ namespace Mondo.Common
                 return(new Acquire(this));
             }
         }
+
+        /****************************************************************************/
+        public async Task<Acquire> AcquireAsync()
+        {
+            AsyncAcquire acquire = new AsyncAcquire(this);
+
+            return await acquire.Open();
+        }
+        
+	    /*************************************************************************/
+        /*************************************************************************/
+        private class AsyncAcquire : Acquire
+	    {
+            /*************************************************************************/
+            public AsyncAcquire(IOpenable objOpenable)
+            {
+                m_objOpenable = objOpenable;
+            }
+
+            /*************************************************************************/
+            public async Task<Acquire> Open()
+            {
+                await m_objOpenable.OpenAsync();
+
+                return this;
+            }
+	    }
 
         #region IDisposable Members
 

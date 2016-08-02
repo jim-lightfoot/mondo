@@ -112,5 +112,42 @@ namespace Mondo.Common
         {
             Run(fnAction, new RetryPolicy(iMaxRetries, iStartRetryWait, dRetryWaitIncrementFactor));
         }
-    }
+
+        /*************************************************************************/
+        public static async Task RunAsync(Func<Task> fnAction, RetryPolicy policy)
+        {        
+            Exception exLog      = null;
+            int       iRetryWait = policy.RetryWait;
+            int       nRetries   = policy.MaxRetries;
+
+            while(nRetries-- > 0)
+            { 
+                try
+                {
+                    await fnAction();
+
+                    return;
+                }
+                catch(Exception ex)
+                {
+                    if(!policy.ShouldRetry(ex))
+                        throw;
+
+                    exLog = ex;
+                }
+
+                await Task.Delay(iRetryWait);
+
+                iRetryWait = (int)(iRetryWait * policy.RetryWaitIncrementFactor);
+            }
+
+            throw exLog;
+        }
+        
+        /*************************************************************************/
+        public static async Task RunAsync(Func<Task> fnAction, int iMaxRetries = RetryPolicy.kDefault, int iStartRetryWait = RetryPolicy.kDefault, double dRetryWaitIncrementFactor = RetryPolicy.kDefault)
+        {
+            await RunAsync(fnAction, new RetryPolicy(iMaxRetries, iStartRetryWait, dRetryWaitIncrementFactor));
+        }
+   }
 }
