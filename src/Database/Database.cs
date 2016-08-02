@@ -29,6 +29,8 @@ using System.Data.SqlClient;
 using System.Data.SqlTypes;
 using System.IO;
 using System.Text;
+using System.Threading.Tasks;
+
 using Mondo.Common;
 using Mondo.Xml;
 
@@ -217,6 +219,35 @@ namespace Mondo.Database
         }
 
         /****************************************************************************/
+        public async override Task OpenAsync()
+        {          
+            try
+            {   
+                if(!IsOpen)
+                {
+                    m_objConnection = m_objFactory.CreateConnection();
+
+                    try
+                    {
+                        m_objConnection.ConnectionString = m_strConnectionString;
+                    }
+                    catch(Exception ex)
+                    {
+                        throw new DatabaseException("Invalid connection string format", ex);
+                    }
+
+                    await m_objConnection.OpenAsync();
+                }
+
+                await base.OpenAsync();                
+            }
+            catch(Exception ex)
+            {
+               throw ex;
+            }
+        }
+
+        /****************************************************************************/
         public override void Close()
         {
             base.Close();
@@ -381,23 +412,31 @@ namespace Mondo.Database
         }
 
         /****************************************************************************/
-        public DbDataReader ExecuteSelect(string strSelect)
+        public DbDataReader ExecuteSelect(string strSelect, CommandBehavior eBehavior = CommandBehavior.Default)
         {
             DbCommand objCommand = MakeSelectCommand(strSelect);
 
-            return(ExecuteSelect(objCommand));
+            return(ExecuteSelect(objCommand, eBehavior));
         }
 
         /****************************************************************************/
-        public DbDataReader ExecuteSelect(DbCommand objCommand)
+        public async Task<DbDataReader> ExecuteSelectAsync(string strSelect, CommandBehavior eBehavior = CommandBehavior.Default)
+        {
+            DbCommand objCommand = MakeSelectCommand(strSelect);
+
+            return await ExecuteSelectAsync(objCommand, eBehavior);
+        }
+
+        /****************************************************************************/
+        public async Task<DbDataReader> ExecuteSelectAsync(DbCommand objCommand, CommandBehavior eBehavior = CommandBehavior.Default)
         {
             objCommand.Connection = this.Connection;
 
             DbDataReader objReader = null;
 
-            Retry.Run( ()=>
+            await Retry.RunAsync( async ()=>
             {
-                objReader = objCommand.ExecuteReader();
+                objReader = await objCommand.ExecuteReaderAsync(eBehavior);
             }, 
             this.RetryPolicy);
 
@@ -405,7 +444,7 @@ namespace Mondo.Database
         }
 
         /****************************************************************************/
-        public DbDataReader ExecuteSelect(DbCommand objCommand, CommandBehavior eBehavior)
+        public DbDataReader ExecuteSelect(DbCommand objCommand, CommandBehavior eBehavior = CommandBehavior.Default)
         {
             objCommand.Connection = this.Connection;
 
@@ -505,15 +544,6 @@ namespace Mondo.Database
         public DBRow ExecuteSingleRow(Operation sp)     {return(new DBRow(ExecuteDataTable(sp)));}
 
         /****************************************************************************/
-        public DataTable ExecuteDataTable(string strSelect)
-        {
-            using(DbCommand objCommand = MakeSelectCommand(strSelect))
-            {
-                return(ExecuteDataTable(objCommand));
-            }
-        }
-
-        /****************************************************************************/
         public DataSourceList ExecuteDataSourceList(string strSelect)
         {
             return(new DBRowList(ExecuteDataTable(strSelect)));
@@ -529,6 +559,15 @@ namespace Mondo.Database
         public DataSourceList ExecuteDataSourceList(DbCommand objCommand)
         {
             return(new DBRowList(ExecuteDataTable(objCommand)));
+        }
+
+        /****************************************************************************/
+        public DataTable ExecuteDataTable(string strSelect)
+        {
+            using(DbCommand objCommand = MakeSelectCommand(strSelect))
+            {
+                return(ExecuteDataTable(objCommand));
+            }
         }
 
         /****************************************************************************/
@@ -567,6 +606,24 @@ namespace Mondo.Database
         }
 
         /****************************************************************************/
+        public IList<T> ExecuteList<T>(string strSelect) where T : new()
+        {
+            return ExecuteDataTable(strSelect).ToList<T>();
+        }
+
+        /****************************************************************************/
+        public IList<T> ExecuteList<T>(Operation sp) where T : new()
+        {
+            return ExecuteDataTable(sp).ToList<T>();
+        }
+
+        /****************************************************************************/
+        public IList<T> ExecuteList<T>(DbCommand objCommand) where T : new()
+        {       
+            return ExecuteDataTable(objCommand).ToList<T>();
+        }
+
+        /****************************************************************************/
         public Dictionary<string, string> ExecuteDictionary(string strSelect, string idKeyField, string idValueField)
         {
             using(DataTable dt = this.ExecuteDataTable(strSelect))
@@ -597,6 +654,17 @@ namespace Mondo.Database
         }
 
         /****************************************************************************/
+        public async Task DoTaskAsync(string strSelect)
+        {
+            using(DbCommand objCommand = MakeSelectCommand(strSelect))
+            {
+                await DoTaskAsync(objCommand);              
+            }
+            
+            return;
+        }
+
+        /****************************************************************************/
         public void DoTask(string strSelect)
         {
             using(DbCommand objCommand = MakeSelectCommand(strSelect))
@@ -611,6 +679,12 @@ namespace Mondo.Database
         public void DoTask(Operation objProc)
         {
             DoTask(objProc.Command);              
+        }
+
+        /****************************************************************************/
+        public async Task DoTaskAsync(Operation objProc)
+        {
+            await DoTaskAsync(objProc.Command);              
         }
 
         /****************************************************************************/
@@ -630,6 +704,28 @@ namespace Mondo.Database
             {
                 using(Acquire o = new Acquire(this))
                     DoTask(objCommand);
+            }
+            
+            return;
+        }
+
+        /****************************************************************************/
+        public async Task DoTaskAsync(DbCommand objCommand)
+        {
+            if(this.IsOpen)
+            {
+                objCommand.Connection = this.Connection;
+
+                await Retry.RunAsync( async ()=>
+                {
+                    await objCommand.ExecuteNonQueryAsync();              
+                }, 
+                this.RetryPolicy);
+            }
+            else
+            {
+                using(Acquire o = await this.AcquireAsync())
+                    await DoTaskAsync(objCommand);
             }
             
             return;

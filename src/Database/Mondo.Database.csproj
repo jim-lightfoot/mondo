@@ -9,8 +9,8 @@
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Mondo.Database</RootNamespace>
-    <AssemblyName>MondoDatabase</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <AssemblyName>Mondo.Database</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>Mondo.Database.pfx</AssemblyOriginatorKeyFile>
@@ -97,6 +97,7 @@
   <ItemGroup>
     <Compile Include="BinaryData.cs" />
     <Compile Include="Database.cs" />
+    <Compile Include="DatabaseExtensions.cs" />
     <Compile Include="DbXmlReader.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="StoredProc.cs" />
