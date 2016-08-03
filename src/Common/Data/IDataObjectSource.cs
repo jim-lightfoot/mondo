@@ -54,7 +54,7 @@ namespace Mondo.Common
     /// </summary>
     public interface IDataObjectSource : IModel
     {
-        string              Get(string strColumnName);
+        string              Get(string strColumnName, string defaultVal = "");
         IDataObjectSource   GetSubObject(string idSubObject);
         DataSourceList      GetSubList(string idSubList);
 
@@ -82,6 +82,52 @@ namespace Mondo.Common
 
             return(Utility.Convert<T>(val, defaultVal));
 		}
+
+        /****************************************************************************/
+	    public static T ToObject<T>(this IDataObjectSource ds) where T : new()
+		{
+    		T               obj         = new T();
+            Type            type        = obj.GetType();
+            PropertyInfo[]  properties  = type.GetProperties();
+
+            foreach(PropertyInfo property in properties)
+            {
+                string name = property.Name;
+
+                if(property.PropertyType.Name == "String")
+                {
+                    string value = ds.Get(name);
+
+                    property.SetValue(obj, value);
+                }   
+                else if(property.PropertyType.Name.StartsWith("Nullable"))
+                {
+                    object value = ds.Get(name, null);
+
+                    if(value != null)
+                        property.SetValue(obj, Utility.ConvertType(value, property.PropertyType.GenericTypeArguments[0]));
+                }   
+                else if(property.PropertyType.IsValueType)
+                {
+                    object value = ds.Get(name);
+
+                    property.SetValue(obj, Utility.ConvertType(value, property.PropertyType));
+                }   
+            }
+
+            return obj;
+		}
+
+        /****************************************************************************/
+	    public static IList<T> ToList<T>(this DataSourceList dsl) where T : new()
+        {
+            List<T> list = new List<T>();
+
+            foreach(IDataObjectSource ds in dsl)
+                list.Add(ds.ToObject<T>());
+
+            return list;
+        }
     }
 
     /****************************************************************************/
@@ -186,7 +232,7 @@ namespace Mondo.Common
         
         #region IDataObjectSource Members
 
-        public abstract string              Get(string strColumnName);
+        public abstract string              Get(string strColumnName, string defaultVal = "");
         public abstract IEnumerable         Columns    {get;}
         
         /****************************************************************************/
@@ -257,7 +303,7 @@ namespace Mondo.Common
         }
 
         /****************************************************************************/
-        public override string Get(string strColumnName)
+        public override string Get(string strColumnName, string defaultVal = "")
         {
             return(m_objKey.GetValue(strColumnName).Normalized());
         }
@@ -295,7 +341,7 @@ namespace Mondo.Common
         }
         
         /****************************************************************************/
-        public override string Get(string idColumn)
+        public override string Get(string idColumn, string defaultVal = "")
         {
             return("");
         }
@@ -395,7 +441,7 @@ namespace Mondo.Common
         }
 
         /****************************************************************************/
-        public override string Get(string idColumn)
+        public override string Get(string idColumn, string defaultVal = "")
         {
             try
             {
@@ -403,7 +449,7 @@ namespace Mondo.Common
             }
             catch
             {
-                return("");
+                return(defaultVal);
             }
         }
 
@@ -488,7 +534,7 @@ namespace Mondo.Common
         }
 
         /****************************************************************************/
-        public override string Get(string strColumnName)
+        public override string Get(string strColumnName, string defaultVal = "")
         {
             try
             {
@@ -496,7 +542,7 @@ namespace Mondo.Common
             }
             catch
             {
-                return("");
+                return(defaultVal);
             }
         }
 
@@ -552,9 +598,9 @@ namespace Mondo.Common
         }
 
         /****************************************************************************/
-        public override string Get(string strColumnName)
+        public override string Get(string strColumnName, string defaultVal = "")
         {
-            return(m_xmlSource.GetChildText(strColumnName));
+            return(m_xmlSource.GetChildText(strColumnName, defaultVal));
         }
         
         /****************************************************************************/
@@ -640,9 +686,9 @@ namespace Mondo.Common
         }
 
         /****************************************************************************/
-        public override string Get(string strColumnName)
+        public override string Get(string strColumnName, string defaultVal = "")
         {
-            return(m_xmlSource.GetAttribute(strColumnName));
+            return(m_xmlSource.GetAttribute(strColumnName, defaultVal));
         }
         
         /****************************************************************************/
@@ -1001,7 +1047,7 @@ namespace Mondo.Common
         }
 
         /****************************************************************************/
-        public override string Get(string strColumnName)
+        public override string Get(string strColumnName, string defaultVal = "")
         {
             try
             {
@@ -1023,7 +1069,7 @@ namespace Mondo.Common
             }
             catch
             {
-                return("");
+                return(defaultVal);
             }
         }        
         
