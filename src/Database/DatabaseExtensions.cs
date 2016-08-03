@@ -43,6 +43,11 @@ namespace Mondo.Database
 
             return list;
         }        
-        
+
+        /****************************************************************************/
+        public static string QueryString(this Database db, Operation op)
+        {
+            return db.ExecuteScalar(op).Normalized();
+        }
     }
 }

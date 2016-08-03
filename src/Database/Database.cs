@@ -428,35 +428,21 @@ namespace Mondo.Database
         }
 
         /****************************************************************************/
-        public async Task<DbDataReader> ExecuteSelectAsync(DbCommand objCommand, CommandBehavior eBehavior = CommandBehavior.Default)
+        public async Task<DbDataReader> ExecuteSelectAsync(DbCommand cmd, CommandBehavior eBehavior = CommandBehavior.Default)
         {
-            objCommand.Connection = this.Connection;
-
-            DbDataReader objReader = null;
-
-            await Retry.RunAsync( async ()=>
+            return await ExecuteAsync(cmd, async (dbCommand)=>
             {
-                objReader = await objCommand.ExecuteReaderAsync(eBehavior);
-            }, 
-            this.RetryPolicy);
-
-            return(objReader);
+                return await dbCommand.ExecuteReaderAsync(eBehavior);
+            });
         }
 
         /****************************************************************************/
-        public DbDataReader ExecuteSelect(DbCommand objCommand, CommandBehavior eBehavior = CommandBehavior.Default)
+        public DbDataReader ExecuteSelect(DbCommand cmd, CommandBehavior eBehavior = CommandBehavior.Default)
         {
-            objCommand.Connection = this.Connection;
-
-            DbDataReader objReader = null;
-
-            Retry.Run( ()=>
+            return Execute<DbDataReader>(cmd, (dbCommand)=>
             {
-                objReader = objCommand.ExecuteReader(eBehavior);
-            }, 
-            this.RetryPolicy);
-
-            return(objReader);
+                return dbCommand.ExecuteReader(eBehavior);
+            });
         }
 
         /****************************************************************************/
@@ -477,30 +463,21 @@ namespace Mondo.Database
         /****************************************************************************/
         public DataSet ExecuteDataSet(DbCommand cmd)
         {
-            if(this.IsOpen)
+            return Execute<DataSet>(cmd, (dbCommand)=>
             {
-                cmd.Connection = this.Connection;
-
                 DataSet objDataSet = null;
 
-                Retry.Run( ()=>
+                using(DbDataAdapter objAdapter = m_objFactory.CreateDataAdapter())
                 {
-                    using(DbDataAdapter objAdapter = m_objFactory.CreateDataAdapter())
-                    {
-                        objAdapter.SelectCommand = cmd;
+                    objAdapter.SelectCommand = dbCommand;
 
-                        objDataSet = new DataSet("_data");
+                    objDataSet = new DataSet("_data");
 
-                        objAdapter.Fill(objDataSet);
-                    }
-                }, 
-                this.RetryPolicy);
+                    objAdapter.Fill(objDataSet);
+                }
 
-                return(objDataSet);
-            }
-
-            using(this.Acquire)
-                return(ExecuteDataSet(cmd));
+                return objDataSet;
+            });
         }
 
         /****************************************************************************/
@@ -510,32 +487,18 @@ namespace Mondo.Database
         }
 
         /****************************************************************************/
-        public XmlDocument ExecuteForXml(DbCommand objCommand)
+        public XmlDocument ExecuteForXml(DbCommand cmd)
         {
-            if(this.IsOpen)
+            return Execute<XmlDocument>(cmd, (dbCommand)=>
             {
-                objCommand.Connection = this.Connection;
-
-                XmlDocument xmlReturn = null;
-
-                Retry.Run( ()=>
+                using(XmlReader objReader = (dbCommand as SqlCommand).ExecuteXmlReader())
                 {
-                    using(XmlReader objReader = (objCommand as SqlCommand).ExecuteXmlReader())
-                    {
-                        while(objReader.Read())
-                        { 
-                            xmlReturn = XmlDoc.Load(objReader);
-                            break;
-                        }
-                    }
-                }, 
-                this.RetryPolicy);
-
-                return(xmlReturn);
-           }
- 
-            using(Acquire o = new Acquire(this))
-                return(ExecuteForXml(objCommand));
+                    while(objReader.Read())
+                        return XmlDoc.Load(objReader);
+                }        
+                
+                return null;   
+            });
         }
 
         /****************************************************************************/
@@ -577,32 +540,23 @@ namespace Mondo.Database
         }
 
         /****************************************************************************/
-        public DataTable ExecuteDataTable(DbCommand objCommand)
+        public DataTable ExecuteDataTable(DbCommand cmd)
         {
-            if(this.IsOpen)
+            return Execute<DataTable>(cmd, (dbCommand)=>
             {
-                objCommand.Connection = this.Connection;
-
                 DataTable objDataTable = null;
 
-                Retry.Run( ()=>
+                using(DbDataAdapter objAdapter = m_objFactory.CreateDataAdapter())
                 {
-                    using(DbDataAdapter objAdapter = m_objFactory.CreateDataAdapter())
-                    {
-                        objAdapter.SelectCommand = objCommand;
+                    objAdapter.SelectCommand = dbCommand;
 
-                        objDataTable = new DataTable("_data");
+                    objDataTable = new DataTable("_data");
 
-                        objAdapter.Fill(objDataTable);
-                    }
-                }, 
-                this.RetryPolicy);
+                    objAdapter.Fill(objDataTable);
+                }
 
                 return(objDataTable);
-            }
-
-            using(Acquire a = new Acquire(this))
-                return(ExecuteDataTable(objCommand));
+            });
         }
 
         /****************************************************************************/
@@ -872,81 +826,6 @@ namespace Mondo.Database
         }
 
         /****************************************************************************/
-        public uint QueryUint(string strSelect)
-        {
-            return(Utility.ToUint(ExecuteScalar(strSelect)));
-        }
-
-        /****************************************************************************/
-        public uint QueryUint(Operation sp)
-        {
-            return(Utility.ToUint(ExecuteScalar(sp)));
-        }
-
-        /****************************************************************************/
-        public uint QueryUint(DbCommand cmd)
-        {
-            return(Utility.ToUint(ExecuteScalar(cmd)));
-        }
-
-        /****************************************************************************/
-        public int QueryInt(string strSelect)
-        {
-            return(Utility.ToInt(ExecuteScalar(strSelect)));
-        }
-
-        /****************************************************************************/
-        public int QueryInt(Operation sp)
-        {
-            return(Utility.ToInt(ExecuteScalar(sp)));
-        }
-
-        /****************************************************************************/
-        public int QueryInt(DbCommand cmd)
-        {
-            return(Utility.ToInt(ExecuteScalar(cmd)));
-        }
-
-        /****************************************************************************/
-        public long QueryLong(string strSelect)
-        {
-            return(Utility.ToLong(ExecuteScalar(strSelect)));
-        }
-
-        /****************************************************************************/
-        public long QueryLong(Operation sp)
-        {
-            return(Utility.ToLong(ExecuteScalar(sp)));
-        }
-
-        /****************************************************************************/
-        public long QueryLong(DbCommand cmd)
-        {
-            return(Utility.ToLong(ExecuteScalar(cmd)));
-        }
-
-        /****************************************************************************/
-        public string QueryString(string strSelect)
-        {
-            using(DbCommand cmd = MakeSelectCommand(strSelect))
-            {
-                return(QueryString(cmd));
-            }
-        }
-
-        /****************************************************************************/
-        public string QueryString(Operation objProc)
-        {
-            return(QueryString(objProc.Command));
-        }
-
-        /****************************************************************************/
-        public string QueryString(DbCommand cmd)
-        {
-            return(ExecuteScalar(cmd).Normalized());
-        }
-
-        /****************************************************************************/
         public SecureString QuerySecureString(DbCommand cmd)
         {
             byte[] aData  = QueryBinary(cmd); // If the data isn't binary then this won't work
@@ -1032,7 +911,141 @@ namespace Mondo.Database
             return(ExecuteScalar(objProc.Command));
         }
 
-        #region Exceptions
+        /****************************************************************************/
+        public object ExecuteScalar(DbCommand cmd)
+        {
+            object objReturn =  Execute<object>(cmd, (dbCommand)=>
+                                {
+                                    return dbCommand.ExecuteScalar();
+                                });
+
+            if(objReturn == null)
+                throw new NoValueException();
+
+            return(objReturn);
+        }
+
+        /****************************************************************************/
+        public T ExecuteScalar<T>(string strSelect) where T : struct
+        {
+            return Utility.Convert<T>(ExecuteScalar(strSelect));
+        }
+
+        /****************************************************************************/
+        public T ExecuteScalar<T>(DbCommand cmd) where T : struct
+        {
+            return Utility.Convert<T>(ExecuteScalar(cmd));
+        }
+
+        /****************************************************************************/
+        public T ExecuteScalar<T>(Operation objProc) where T : struct
+        {
+            return Utility.Convert<T>(ExecuteScalar(objProc));
+        }
+
+        /****************************************************************************/
+        public async Task<object> ExecuteScalarAsync(string strSelect) 
+        {
+            using(DbCommand cmd = MakeSelectCommand(strSelect))
+            {
+                return await ExecuteScalarAsync(cmd);
+            }
+        }
+
+        /****************************************************************************/
+        public async Task<T> ExecuteScalarAsync<T>(string strSelect) where T : struct
+        {
+            using(DbCommand cmd = MakeSelectCommand(strSelect))
+            {
+                return await ExecuteScalarAsync<T>(cmd);
+            }
+        }
+
+        /****************************************************************************/
+        public async Task<object> ExecuteScalarAsync(Operation objProc) 
+        {
+            return await ExecuteScalarAsync(objProc.Command);
+        }
+
+        /****************************************************************************/
+        public async Task<T> ExecuteScalarAsync<T>(Operation objProc) where T : struct 
+        {
+            return await ExecuteScalarAsync<T>(objProc.Command);
+        }
+
+        /****************************************************************************/
+        public async Task<object> ExecuteScalarAsync(DbCommand cmd) 
+        {
+            return await ExecuteAsync(cmd, async (dbCommand)=>
+            {
+                return await dbCommand.ExecuteScalarAsync();
+            });
+        }
+
+        /****************************************************************************/
+        public async Task<T> ExecuteScalarAsync<T>(DbCommand cmd) where T : struct
+        {
+            return await ExecuteAsync(cmd, async (dbCommand)=>
+            {
+                object val = await dbCommand.ExecuteScalarAsync();
+
+                return Utility.Convert<T>(val);
+            });
+        }
+
+        private delegate Task<T> AsyncDelegate<T>(DbCommand objCommand);
+
+        /****************************************************************************/
+        private async Task<T> ExecuteAsync<T>(DbCommand cmd, AsyncDelegate<T> fn)
+        {
+            if(this.IsOpen)
+            {
+                cmd.Connection = this.Connection;
+
+				T obj = default(T);
+
+                await Retry.RunAsync( async ()=>
+                {
+                    obj = await fn(cmd);              
+                }, 
+                this.RetryPolicy);
+            
+	            return obj;
+            }
+            else
+            {
+                using(Acquire o = await this.AcquireAsync())
+                    return await ExecuteAsync<T>(cmd, fn);
+            }
+        }
+
+         private delegate T SyncDelegate<T>(DbCommand objCommand);
+
+        /****************************************************************************/
+        private T Execute<T>(DbCommand cmd, SyncDelegate<T> fn)
+        {
+            if(this.IsOpen)
+            {
+                cmd.Connection = this.Connection;
+
+				T obj = default(T);
+
+                Retry.Run( ()=>
+                {
+                    obj = fn(cmd);              
+                }, 
+                this.RetryPolicy);
+            
+	            return obj;
+            }
+            else
+            {
+                using(Acquire o = this.Acquire)
+                    return Execute<T>(cmd, fn);
+            }
+        }
+
+       #region Exceptions
 
         /****************************************************************************/
         /****************************************************************************/
@@ -1070,31 +1083,6 @@ namespace Mondo.Database
         }
 
         #endregion
-
-        /****************************************************************************/
-        public object ExecuteScalar(DbCommand cmd)
-        {
-            if(this.IsOpen)
-            {
-                cmd.Connection = this.Connection;
-
-                object objReturn = null;
-
-                Retry.Run( ()=>
-                {
-                    objReturn = cmd.ExecuteScalar();
-                }, 
-                this.RetryPolicy);
-
-                if(objReturn == null)
-                    throw new NoValueException();
-
-                return(objReturn);
-            }
-
-            using(Acquire o = new Acquire(this))
-                return(ExecuteScalar(cmd));
-        }
 
         /****************************************************************************/
         private static string[] s_pszEncode = {"\'",  "\"",  ",",   ".",   ";",   "\r",  "\n",  "<",   ">",   "(",   ")"};
