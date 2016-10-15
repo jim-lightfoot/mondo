@@ -385,7 +385,7 @@ namespace Mondo.Common
             catch(Exception ex)
             {
                 if(bThrow)
-                    throw;
+                    throw ex;
 
                 return(defaultVal);
             }

@@ -51,23 +51,14 @@ namespace Mondo.Common
         {
             XmlDocument xmlResult = new XmlDocument();
             XmlNode     xmlRoot   = xmlResult.AddChild("Data");
-            int index = 0;
-            
-            try
-            { 
-                foreach(string key in collection.AllKeys)
-                {
-                    string     value  = collection[key].Trim();
-                    StringList parts  = new StringList(key, "[", false);
-                    XmlNode    xmlNew = GetFormNode(parts, 0, xmlRoot);
 
-                    xmlNew.InnerText = value;
-                    ++index;
-                }
-            }
-            catch(Exception ex)
+            foreach(string key in collection.AllKeys)
             {
-              throw;
+                string     value  = collection[key].Trim();
+                StringList parts  = new StringList(key, "[", false);
+                XmlNode    xmlNew = GetFormNode(parts, 0, xmlRoot);
+
+                xmlNew.InnerText = value;
             }
 
             return xmlResult;
