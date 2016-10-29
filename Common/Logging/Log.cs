@@ -38,36 +38,25 @@ namespace Mondo.Common
 
     /*************************************************************************/
     /*************************************************************************/
-    public static class Log
+    public class ApplicationLog : ILog
     {
-        private static readonly List<LogEntry> m_aLogs       = new List<LogEntry>();
-        private static ExceptionCache          m_objCache    = new ExceptionCache();
+        private readonly List<LogEntry> _aLogs    = new List<LogEntry>();
+        private ExceptionCache          _objCache = new ExceptionCache();
 
         /*************************************************************************/
-        public static void Register(ILog log, bool fallbackOnly = false, bool fallbackAsError = false)
+        public void Register(ILog log, bool fallbackOnly = false, bool fallbackAsError = false)
         {
-            m_aLogs.Add(new LogEntry {Log = log, FallbackOnly = fallbackOnly, FallbackAsError = fallbackAsError});
+            _aLogs.Add(new LogEntry {Log = log, FallbackOnly = fallbackOnly, FallbackAsError = fallbackAsError});
         }
 
         /*************************************************************************/
-        /*************************************************************************/
-        public enum SeverityLevel
+        public void ClearRegistered()
         {
-            Verbose     = 0,
-            Information = 1,
-            Warning     = 2,
-            Error       = 3,
-            Critical    = 4
+            _aLogs.Clear();
         }
 
         /*************************************************************************/
-        public static void ClearRegistered()
-        {
-            m_aLogs.Clear();
-        }
-
-        /*************************************************************************/
-        public static void WriteError(Exception ex, Dictionary<string, string> properties = null)
+        public void WriteError(Exception ex, Dictionary<string, string> properties = null)
         {
             // Don't need to log these
             if(ex is ThreadAbortException)
@@ -79,7 +68,7 @@ namespace Mondo.Common
 
             // If it's added to the cache we can send messages otherwise it's already 
             //    in there and we don't want to send it again
-            if(m_objCache.Add(ref ex))
+            if(_objCache.Add(ref ex))
             {
                 WriteTelemetry(log => 
                 { 
@@ -89,7 +78,7 @@ namespace Mondo.Common
         }
 
         /*************************************************************************/
-        public static void WriteEvent(string eventName, Dictionary<string, string> properties = null, Dictionary<string, double> metrics = null)
+        public void WriteEvent(string eventName, Dictionary<string, string> properties = null, Dictionary<string, double> metrics = null)
         {
             WriteTelemetry(log =>
             { 
@@ -98,7 +87,7 @@ namespace Mondo.Common
         }
 
         /*************************************************************************/
-        public static void WriteMetric(string metricName, double value, Dictionary<string, string> properties = null)
+        public void WriteMetric(string metricName, double value, Dictionary<string, string> properties = null)
         {
             WriteTelemetry(log => 
             { 
@@ -107,7 +96,7 @@ namespace Mondo.Common
         }
 
         /*************************************************************************/
-        public static void WriteTrace(string message, Log.SeverityLevel level, Dictionary<string, string> properties = null)
+        public void WriteTrace(string message, Log.SeverityLevel level, Dictionary<string, string> properties = null)
         {
             WriteTelemetry(log => 
             { 
@@ -116,7 +105,7 @@ namespace Mondo.Common
         }
 
         /*************************************************************************/
-        public static void WriteRequest(string name, DateTime startTime, TimeSpan duration, string responseCode, bool success)
+        public void WriteRequest(string name, DateTime startTime, TimeSpan duration, string responseCode, bool success)
         {
             WriteTelemetry(log => 
             { 
@@ -127,16 +116,19 @@ namespace Mondo.Common
         #region Private Methods
 
         /*************************************************************************/
-        private static void WriteTelemetry(WriteTask fnWrite)
+        private void WriteTelemetry(WriteTask fnWrite)
         {
             // Write telemetry in background thread
+          #if DEBUG
+          #else
             Task.Run(() =>
+          #endif
             {
-                var nLoggers = m_aLogs.Count;
+                var nLoggers = _aLogs.Count;
 
                 for (var i = 0; i < nLoggers; ++i)
                 {
-                    var logger = m_aLogs[i];
+                    var logger = _aLogs[i];
 
                     // Only write primary telemetry to non-fallback loggers
                     if (!logger.FallbackOnly)
@@ -152,18 +144,22 @@ namespace Mondo.Common
                         }
                     }
                 }
-            });
+            }
+          #if DEBUG
+          #else
+            );
+          #endif
         }
 
         /*************************************************************************/
-        private static void FallbackTelemetry(WriteTask fnWrite, int start, Exception excep)
+        private void FallbackTelemetry(WriteTask fnWrite, int start, Exception excep)
         {
-            var nLoggers = m_aLogs.Count;
+            var nLoggers = _aLogs.Count;
 
             // Go through all the loggers after the last one
             for (var j = start; j < nLoggers; ++j)
             {
-                var fallBackLogger = m_aLogs[j];
+                var fallBackLogger = _aLogs[j];
 
                 // Find the first fallback logger
                 if (fallBackLogger.FallbackOnly)
@@ -211,36 +207,61 @@ namespace Mondo.Common
 
     /*************************************************************************/
     /*************************************************************************/
-    public sealed class ApplicationLog : ILog
+    public static class Log
     {
+        private static readonly ApplicationLog _log = new ApplicationLog();
+
         /*************************************************************************/
-        public void WriteError(Exception ex, Dictionary<string, string> properties = null)
+        public static void Register(ILog log, bool fallbackOnly = false, bool fallbackAsError = false)
         {
-            Log.WriteError(ex, properties);
+            _log.Register(log, fallbackOnly, fallbackAsError);
         }
 
         /*************************************************************************/
-        public void WriteEvent(string eventName, Dictionary<string, string> properties = null, Dictionary<string, double> metrics = null)
+        /*************************************************************************/
+        public enum SeverityLevel
         {
-            Log.WriteEvent(eventName, properties, metrics);
+            Verbose     = 0,
+            Information = 1,
+            Warning     = 2,
+            Error       = 3,
+            Critical    = 4
         }
 
         /*************************************************************************/
-        public void WriteMetric(string metricName, double value, Dictionary<string, string> properties = null)
+        public static void ClearRegistered()
         {
-            Log.WriteMetric(metricName, value, properties);
+            _log.ClearRegistered();
         }
 
         /*************************************************************************/
-        public void WriteTrace(string message, Log.SeverityLevel level, Dictionary<string, string> properties = null)
+        public static void WriteError(Exception ex, Dictionary<string, string> properties = null)
         {
-            Log.WriteTrace(message, level, properties);
+            _log.WriteError(ex, properties);
         }
 
         /*************************************************************************/
-        public void WriteRequest(string name, DateTime startTime, TimeSpan duration, string responseCode, bool success)
+        public static void WriteEvent(string eventName, Dictionary<string, string> properties = null, Dictionary<string, double> metrics = null)
         {
-            Log.WriteRequest(name, startTime, duration, responseCode, success);
+            _log.WriteEvent(eventName, properties, metrics);
+        }
+
+        /*************************************************************************/
+        public static void WriteMetric(string metricName, double value, Dictionary<string, string> properties = null)
+        {
+            _log.WriteMetric(metricName, value, properties);
+        }
+
+        /*************************************************************************/
+        public static void WriteTrace(string message, Log.SeverityLevel level, Dictionary<string, string> properties = null)
+        {
+            _log.WriteTrace(message, level, properties);
+        }
+
+        /*************************************************************************/
+        public static void WriteRequest(string name, DateTime startTime, TimeSpan duration, string responseCode, bool success)
+        {
+            _log.WriteRequest(name, startTime, duration, responseCode, success);
         }
     }
 }

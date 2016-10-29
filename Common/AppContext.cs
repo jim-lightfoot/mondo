@@ -53,10 +53,18 @@ namespace Mondo.Common
         private IConfig                             _config     = null;
 
         /****************************************************************************/
-        public ApplicationContext()
+        public ApplicationContext() : this(true, true)
         {
-            this.Config = new AppConfig();
-            this.Log    = new ApplicationLog();
+        }
+
+        /****************************************************************************/
+        protected ApplicationContext(bool config, bool log)
+        {
+            if(config)
+                this.Config = new AppConfig();
+
+            if(log)
+                this.Log = new ApplicationLog();
 
            #if DEBUG
             this.IsDebug = true;

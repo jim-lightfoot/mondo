@@ -33,7 +33,12 @@ namespace Mondo.Web
     public class WebContext : ApplicationContext
     {
         /****************************************************************************/
-        public WebContext()
+        public WebContext() : this(true, true)
+        {
+        }
+
+        /****************************************************************************/
+        protected WebContext(bool config, bool log) : base(config, log)
         {
             this.Cache = new Cache();
             WebUtil.Cache.AddSetting("AppContext", this);
