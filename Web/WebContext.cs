@@ -53,7 +53,10 @@ namespace Mondo.Web
         /****************************************************************************/
         public override string MapPath(string path)
         {
-            return(HttpContext.Current.Server.MapPath(path));
+            if(string.IsNullOrWhiteSpace(path))
+              path = "";
+
+            return(WebUtil.MapPath(path));
         }
 
         /****************************************************************************/

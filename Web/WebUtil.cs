@@ -76,51 +76,51 @@ namespace Mondo.Web
         }
 
         /*************************************************************************/
-        public static string RelativePath(string strPath)
+        public static string RelativePath(string path)
         {
-            if(strPath.StartsWith("~/"))
+            if(path.StartsWith("~/"))
             {
                 string strAppPath = HttpContext.Current.Request.ApplicationPath;
 
-                return(strPath.Replace("~/", strAppPath + "/").Replace("//", "/"));
+                return(path.Replace("~/", strAppPath + "/").Replace("//", "/"));
             }
 
-            return(strPath.Replace("//", "/"));
+            return(path.Replace("//", "/"));
         }
 
         /*************************************************************************/
-        public static string AbsolutePath(string strPath)
+        public static string AbsolutePath(string path)
         {
-            if(strPath.StartsWith("~/"))
+            if(path.StartsWith("~/"))
             {
-                string strWebPath = HttpContext.Current.Request.MapPath("~/d.html");
+                string strWebPath = System.Web.Hosting.HostingEnvironment.MapPath("~/d.html");
 
-                strWebPath = strWebPath.Substring(0, strWebPath.Length - "d.html".Length) + strPath.Substring(1);
+                strWebPath = strWebPath.Substring(0, strWebPath.Length - "d.html".Length) + path.Substring(1);
 
                 return(strWebPath);
             }
 
-            return(strPath);
+            return(path);
         }
 
         /*************************************************************************/
-        public static string RelativeFromAbsolutePath(string strPath)
+        public static string RelativeFromAbsolutePath(string path)
         {
-            if(strPath.StartsWith("http", StringComparison.CurrentCultureIgnoreCase))
-                return(strPath);
+            if(path.StartsWith("http", StringComparison.CurrentCultureIgnoreCase))
+                return(path);
 
-            string strWebPath = HttpContext.Current.Request.MapPath("~/d.html");
+            string webPath = System.Web.Hosting.HostingEnvironment.MapPath("~/d.html");
 
-            strWebPath = strWebPath.Substring(0, strWebPath.Length - "d.html".Length);
+            webPath = webPath.Substring(0, webPath.Length - "d.html".Length);
 
-            int iIndex = strPath.IndexOf(strWebPath, StringComparison.CurrentCultureIgnoreCase);
+            int iIndex = path.IndexOf(webPath, StringComparison.CurrentCultureIgnoreCase);
 
             if(iIndex == -1)
-                return(strPath);
+                return(path);
 
-            strWebPath = "~/" + strPath.Substring(iIndex + strWebPath.Length);
+            webPath = "~/" + path.Substring(iIndex + webPath.Length);
 
-            return(RelativePath(strWebPath.Replace(System.IO.Path.DirectorySeparatorChar, '/')));
+            return(RelativePath(webPath.Replace(System.IO.Path.DirectorySeparatorChar, '/')));
         }
 
         /*************************************************************************/
@@ -133,35 +133,35 @@ namespace Mondo.Web
         }
 
         /*************************************************************************/
-        public static string MapPath(string strPath)
+        public static string MapPath(string path)
         {
-            return(HttpContext.Current.Request.MapPath(strPath));
+            return(System.Web.Hosting.HostingEnvironment.MapPath(path));
         }
 
         /*************************************************************************/
         public static string PageName(string strURL)
         {
-            string strPageName = strURL;
+            string pageName = strURL;
 
-            if(strPageName.Contains("?"))
-                strPageName = strPageName.Substring(0, strPageName.IndexOf("?"));
+            if(pageName.Contains("?"))
+                pageName = pageName.Substring(0, pageName.IndexOf("?"));
            
-            if(strPageName.Contains("/"))
-                strPageName = strPageName.Substring(strPageName.LastIndexOf("/") + 1);
+            if(pageName.Contains("/"))
+                pageName = pageName.Substring(pageName.LastIndexOf("/") + 1);
 
-            return(strPageName.ToLower());
+            return(pageName.ToLower());
         }
 
         /****************************************************************************/
-        public static string GetUrlParam(string strName)
+        public static string GetUrlParam(string name)
         {
-            return(GetUrlParam(strName, "", true));
+            return(GetUrlParam(name, "", true));
         }
 
         /****************************************************************************/
-        public static string GetUrlParam(string strName, string strDefault)
+        public static string GetUrlParam(string name, string defaultVal)
         {
-            return(GetUrlParam(strName, strDefault, true));
+            return(GetUrlParam(name, defaultVal, true));
         }
 
         /*********************************************************************/
@@ -177,23 +177,23 @@ namespace Mondo.Web
         }
 
         /****************************************************************************/
-        public static string GetUrlParam(string strName, string strDefault, bool bNoTrim)
+        public static string GetUrlParam(string name, string defaultVal, bool bNoTrim)
         {
-            object objValue = HttpContext.Current.Request.QueryString[strName];
+            object val = HttpContext.Current.Request.QueryString[name];
 
-            if(objValue == null)
-                return(strDefault);
+            if(val == null)
+                return(defaultVal);
 
             if(bNoTrim)
-                return(objValue.ToString());
+                return(val.ToString());
 
-            return(objValue.Normalized());
+            return(val.Normalized());
         }
 
         /****************************************************************************/
-        public static T GetUrlParam<T>(string strName, T defaultVal = default(T)) where T : struct
+        public static T GetUrlParam<T>(string name, T defaultVal = default(T)) where T : struct
         {
-            object val = HttpContext.Current.Request.QueryString[strName];
+            object val = HttpContext.Current.Request.QueryString[name];
 
             try
             {
@@ -201,20 +201,20 @@ namespace Mondo.Web
             }
             catch
             { 
-                throw new Exception("The URL param named \"" + strName + "\" with a value of \"" + val.ToString() + "\" is not a valid " + typeof(T).ToString().Replace("System.", ""));
+                throw new Exception("The URL param named \"" + name + "\" with a value of \"" + val.ToString() + "\" is not a valid " + typeof(T).ToString().Replace("System.", ""));
             }        
         }
 
         /****************************************************************************/
-        public static string GetFormParam(string strName)
+        public static string GetFormParam(string name)
         {
-            return(HttpContext.Current.Request.Form[strName].Normalized());
+            return(HttpContext.Current.Request.Form[name].Normalized());
         }
 
         /****************************************************************************/
-        public static T GetFormParam<T>(string strName, T defaultVal = default(T)) where T : struct
+        public static T GetFormParam<T>(string name, T defaultVal = default(T)) where T : struct
         {
-            object val = HttpContext.Current.Request.Form[strName];
+            object val = HttpContext.Current.Request.Form[name];
 
             return(Utility.Convert<T>(val, defaultVal));
         }
@@ -246,41 +246,41 @@ namespace Mondo.Web
             public const int Delete  = -1;
 
             /*********************************************************************/
-            public static string Get(string strName)
+            public static string Get(string name)
             {
-                if(HttpContext.Current.Request.Cookies[strName] != null)
-                    return(WebUtil.UrlDecode(HttpContext.Current.Request.Cookies[strName].Value));
+                if(HttpContext.Current.Request.Cookies[name] != null)
+                    return(WebUtil.UrlDecode(HttpContext.Current.Request.Cookies[name].Value));
 
                 return("");
             }
 
             /*********************************************************************/
-            public static void Add(string strName, string strValue, string domain = "")
+            public static void Add(string name, string strValue, string domain = "")
             {
-                Add(strName, strValue, 30, domain);
+                Add(name, strValue, 30, domain);
             }
 
             /*********************************************************************/
-            public static void Add(string strName, int iValue, string domain = "")
+            public static void Add(string name, int iValue, string domain = "")
             {
-                Add(strName, iValue.ToString(), domain);
+                Add(name, iValue.ToString(), domain);
             }
 
             /*********************************************************************/
-            public static void Add(string strName, string strValue, int nExpires, string strDomain)
+            public static void Add(string name, string strValue, int nExpires, string strDomain)
             {
-                Add(strName, strValue, nExpires, true, true, strDomain);
+                Add(name, strValue, nExpires, true, true, strDomain);
             }
 
             /*********************************************************************/
-            public static void Add(string strName, string strValue, int nExpires, bool bHttpOnly, bool bSecure, string strDomain)
+            public static void Add(string name, string strValue, int nExpires, bool bHttpOnly, bool bSecure, string strDomain)
             {
                 try
                 {
-                    HttpCookie objCookie = HttpContext.Current.Request.Cookies[strName];
+                    HttpCookie objCookie = HttpContext.Current.Request.Cookies[name];
                 
                     if(objCookie == null)
-                        objCookie = new HttpCookie(strName);
+                        objCookie = new HttpCookie(name);
 
                     objCookie.Value     = WebUtil.UrlEncode(strValue);
                     objCookie.Shareable = false;
@@ -303,15 +303,15 @@ namespace Mondo.Web
             }
 
             /*********************************************************************/
-            public static void Remove(string strName, string domain = "")
+            public static void Remove(string name, string domain = "")
             {
                 try
                 {
                     // Remove the cookie from the Request so that it is no longer available server-side
-                    HttpContext.Current.Request.Cookies.Remove(strName);
+                    HttpContext.Current.Request.Cookies.Remove(name);
 
                     // Ensure it is deleted from the user's browser
-                    Add(strName, "", Cookie.Delete, domain);
+                    Add(name, "", Cookie.Delete, domain);
                 }
                 catch
                 {
@@ -329,15 +329,15 @@ namespace Mondo.Web
             private const int kExpires = Cookie.Session;
 
             /****************************************************************************/
-            public static void AddSetting(string strKey, object objValue, string domain)
+            public static void AddSetting(string key, object value, string domain)
             {
-                WebUtil.Cookie.Add(strKey, objValue.ToString(), kExpires, domain);
+                WebUtil.Cookie.Add(key, value.ToString(), kExpires, domain);
             }
 
             /****************************************************************************/
-            public static string GetSetting(string strKey)
+            public static string GetSetting(string key)
             {
-                return(WebUtil.Cookie.Get(strKey));
+                return(WebUtil.Cookie.Get(key));
             }
 
             /****************************************************************************/
@@ -352,10 +352,9 @@ namespace Mondo.Web
 
                     try
                     { 
-                        string strLanguage = aLanguages[0].ToLowerInvariant().Trim(); 
+                        string language = aLanguages[0].ToLowerInvariant().Trim(); 
 
-                        //return(CultureInfo.CreateSpecificCulture(strLanguage)); 
-                        return(strLanguage);
+                        return(language);
                     } 
                     catch 
                     { 
@@ -365,9 +364,9 @@ namespace Mondo.Web
             }
 
             /****************************************************************************/
-            public static void RemoveSetting(string strKey)
+            public static void RemoveSetting(string key)
             {
-                WebUtil.Cookie.Remove(strKey);
+                WebUtil.Cookie.Remove(key);
             }
         }
 
@@ -377,21 +376,21 @@ namespace Mondo.Web
         public static class Cache
         {
             /****************************************************************************/
-            public static void AddSetting(string strKey, object objValue)
+            public static void AddSetting(string key, object value)
             {
-                AddSetting(strKey, objValue, new TimeSpan(1, 0, 0));
+                AddSetting(key, value, new TimeSpan(1, 0, 0));
             }
 
             /****************************************************************************/
-            public static void AddSetting(string strKey, object objValue, TimeSpan tsExpires)
+            public static void AddSetting(string key, object value, TimeSpan tsExpires)
             {
-                HttpContext.Current.Cache.Insert(strKey, objValue, null, System.Web.Caching.Cache.NoAbsoluteExpiration, tsExpires);
+                System.Web.Hosting.HostingEnvironment.Cache.Insert(key, value, null, System.Web.Caching.Cache.NoAbsoluteExpiration, tsExpires);
             }
 
             /****************************************************************************/
-            public static object GetSetting(string strKey)
+            public static object GetSetting(string key)
             {
-                return(HttpContext.Current.Cache[strKey]);
+                return(System.Web.Hosting.HostingEnvironment.Cache[key]);
             }
         }
 
@@ -401,21 +400,21 @@ namespace Mondo.Web
         public static class PageRequest
         {
             /****************************************************************************/
-            public static void AddSetting(string strKey, object objValue)
+            public static void AddSetting(string key, object value)
             {
-                HttpContext.Current.Items.Add(strKey, objValue);
+                HttpContext.Current.Items.Add(key, value);
             }
 
             /****************************************************************************/
-            public static object GetSetting(string strKey)
+            public static object GetSetting(string key)
             {
-                return(HttpContext.Current.Items[strKey]);
+                return(HttpContext.Current.Items[key]);
             }
 
             /****************************************************************************/
-            public static void RemoveSetting(string strKey)
+            public static void RemoveSetting(string key)
             {
-                HttpContext.Current.Items.Remove(strKey);
+                HttpContext.Current.Items.Remove(key);
             }
         }
 

@@ -115,6 +115,7 @@
     <Compile Include="Openable.cs" />
     <Compile Include="StringExtensions.cs" />
     <Compile Include="Threading\ThreadLock.cs" />
+    <Compile Include="Url.cs" />
     <Compile Include="Xml\XmlSerializer.cs" />
     <Compile Include="Xml\XmlSerialize.cs" />
     <Compile Include="Xml\XmlExtensions.cs" />

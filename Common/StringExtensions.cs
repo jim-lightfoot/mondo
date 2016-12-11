@@ -165,6 +165,15 @@ namespace Mondo.Common
         }
 
         /****************************************************************************/
+        public static string EnsureNotStartsWith(this string val, string start)
+        {
+            if(!val.StartsWith(start))
+                return(val);
+
+            return(val.Substring(start.Length).Normalized().EnsureNotStartsWith(start));
+        }
+
+        /****************************************************************************/
         public static string EnsureEndsWith(this string strValue, string strLast)
         {
             if(strValue == null)
@@ -200,13 +209,13 @@ namespace Mondo.Common
         /****************************************************************************/
         public static string EnsureNotEndsWith(this string strValue, string strEnd)
         {
-            if(strValue != null && strValue != "")
-            {
-                if(strValue.EndsWith(strEnd))
-                    return(strValue.Substring(0, strValue.Length - strEnd.Length));
-            }
+            if(string.IsNullOrWhiteSpace(strValue))
+                return "";
 
-            return(strValue.Normalized());
+            if(!strValue.EndsWith(strEnd))
+              return strValue;
+
+            return strValue.Substring(0, strValue.Length - strEnd.Length).Normalized().EnsureNotEndsWith(strEnd);
         }
         
         /****************************************************************************/

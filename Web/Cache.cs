@@ -31,23 +31,23 @@ namespace Mondo.Web
     public class Cache : BaseCache
     {
         /****************************************************************************/
-        public override object Get(string strKey)
+        public override object Get(string key)
         {
-            return(HttpContext.Current.Cache.Get(strKey));
+            return(System.Web.Hosting.HostingEnvironment.Cache.Get(key));
         }
 
         /****************************************************************************/
-        public override void Add(string strKey, object objToAdd)
+        public override void Add(string key, object objToAdd)
         {
-            Add(strKey, objToAdd, new TimeSpan(1, 0, 0));
+            Add(key, objToAdd, new TimeSpan(1, 0, 0));
         }
 
         /****************************************************************************/
-        public override void Add(string strKey, object objToAdd, DateTime dtExpires, ICacheDependency dependency = null)
+        public override void Add(string key, object objToAdd, DateTime expires, ICacheDependency dependency = null)
         {
             try
             { 
-                HttpContext.Current.Cache.Insert(strKey, objToAdd, ToCacheDependency(dependency), dtExpires, System.Web.Caching.Cache.NoSlidingExpiration);
+                System.Web.Hosting.HostingEnvironment.Cache.Insert(key, objToAdd, ToCacheDependency(dependency), expires, System.Web.Caching.Cache.NoSlidingExpiration);
             }
             catch
             {
@@ -55,11 +55,11 @@ namespace Mondo.Web
         }
 
         /****************************************************************************/
-        public override void Add(string strKey, object objToAdd, TimeSpan tsExpires, ICacheDependency dependency = null)
+        public override void Add(string key, object objToAdd, TimeSpan expires, ICacheDependency dependency = null)
         {
             try
             { 
-                HttpContext.Current.Cache.Insert(strKey, objToAdd, ToCacheDependency(dependency), System.Web.Caching.Cache.NoAbsoluteExpiration, tsExpires);
+                System.Web.Hosting.HostingEnvironment.Cache.Insert(key, objToAdd, ToCacheDependency(dependency), System.Web.Caching.Cache.NoAbsoluteExpiration, expires);
             }
             catch
             {
@@ -67,11 +67,11 @@ namespace Mondo.Web
         }
 
         /****************************************************************************/
-        public override void Remove(string strKey)
+        public override void Remove(string key)
         {
             try
             { 
-                HttpContext.Current.Cache.Remove(strKey);
+                System.Web.Hosting.HostingEnvironment.Cache.Remove(key);
             }
             catch
             {
@@ -89,7 +89,6 @@ namespace Mondo.Web
 
             // Don't understand any other types for now
             return(null);
-
         }
     }
 }

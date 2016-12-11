@@ -71,6 +71,7 @@
     <Compile Include="IDataObjectSource.cs" />
     <Compile Include="DiskFile.cs" />
     <Compile Include="CollectionExtensions.cs" />
+    <Compile Include="Url.cs" />
     <Compile Include="XmlExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
