@@ -597,6 +597,26 @@ namespace Mondo.Database
         }
 
         /****************************************************************************/
+        public async Task<IDictionary<string, object>> ExecuteSingleRecordDictionaryAsync(Operation op)
+        {
+          return await ExecuteSingleRecordDictionaryAsync(op.Command);
+        }
+
+        /****************************************************************************/
+        public async Task< IDictionary<string, object> > ExecuteSingleRecordDictionaryAsync(DbCommand cmd)
+        {
+            return await ExecuteAsync< IDictionary<string, object> >(cmd, async (dbCommand)=>
+            {
+                using(DbDataReader reader = await this.ExecuteSelectAsync(cmd))
+                {
+                    IDictionary<string, object> result = await ToSingleRecordDictionaryAsync(reader);
+
+                    return result;
+                }
+            });
+        }
+
+        /****************************************************************************/
         public static Dictionary<string, string> ToDictionary(DataTable dt, string idKeyField, string idValueField)
         {
             Dictionary<string, string> htReturn = new Dictionary<string, string>(137);
@@ -743,6 +763,31 @@ namespace Mondo.Database
 
             using(Acquire o = new Acquire(this))
                 return(ExecuteXml(objCommand, strDBName, aNames));
+        }
+
+        
+        /****************************************************************************/
+        public async Task<string> ExecuteXmlAsync(Operation objProc, string dbName, IList<string> aNames)
+        {
+            return await ExecuteXmlAsync(objProc.Command, dbName, aNames);
+        }
+
+       /****************************************************************************/
+        public async Task<string> ExecuteXmlAsync(Operation objProc, IList<string> aNames)
+        {
+            return await ExecuteXmlAsync(objProc.Command, "", aNames);
+        }
+
+        /****************************************************************************/
+        public async Task<string> ExecuteXmlAsync(DbCommand cmd, string dbName, IList<string> aNames)
+        {
+            return await ExecuteAsync<string>(cmd, async (dbCommand)=>
+            {
+                using(DbDataReader reader = await this.ExecuteSelectAsync(cmd))
+                {
+                    return await ToXmlAsync(reader, dbName, aNames);
+                }
+            });
         }
 
         #region ExecuteXPath
@@ -1108,6 +1153,78 @@ namespace Mondo.Database
         public static string Decode(string strData)
         {
             return(SubstituteList(strData, s_pszDecode, s_pszEncode, 8));
+        }
+
+        /****************************************************************************/
+        public static async Task< IDictionary<string, object> > ToSingleRecordDictionaryAsync(DbDataReader reader)
+        {
+            var values = new Dictionary<string, object>();
+
+            if(await reader.ReadAsync())
+            {
+                int nFields = reader.FieldCount;
+
+                for(int i = 0; i < nFields; ++i)
+                { 
+                    bool isNull = await reader.IsDBNullAsync(i);
+                    string name = reader.GetName(i);
+
+                    values.Add(name, isNull ? null : reader[i]);
+                }
+            }
+
+            return values;
+        }
+
+        /****************************************************************************/
+        public static async Task<string> ToXmlAsync(DbDataReader reader, string dbName, IList<string> tableNames)
+        {
+            var writer = new cXMLWriter();
+
+            writer.WriteStartDocument();
+            { 
+                writer.WriteStartElement(dbName);
+                { 
+                    int index = -1;
+
+                    do
+                    {
+                        ++index;
+
+                        int nFields   = -1;
+                        var tableName = tableNames[index];
+
+                        while(await reader.ReadAsync())
+                        {
+                            if(nFields == -1)
+                                nFields = reader.FieldCount;
+
+                            writer.WriteStartElement(tableName);
+                            { 
+                                for(int i = 0; i < nFields; ++i)
+                                { 
+                                    bool isNull = await reader.IsDBNullAsync(i);
+
+                                    if(!isNull)
+                                    { 
+                                        string name = reader.GetName(i);
+                                        object val  = reader[i];
+
+                                        writer.WriteElementString(name, val.ToString().Trim());
+                                    }
+                                }
+                            }
+
+                            writer.WriteEndElement();
+                        }
+                    } 
+                    while(await reader.NextResultAsync());
+                }
+                writer.WriteEndElement();
+            }
+            writer.WriteEndDocument();
+
+            return writer.ToString();
         }
 
         /****************************************************************************/

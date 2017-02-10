@@ -24,6 +24,7 @@ using System.Xml;
 using System.Xml.XPath;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Runtime.InteropServices;
@@ -122,6 +123,11 @@ namespace Mondo.Common
 
     /****************************************************************************/
     /****************************************************************************/
+    public class ValueOutOfRangeException : Exception {}
+    public class NotFoundException        : Exception {}
+
+    /****************************************************************************/
+    /****************************************************************************/
     public static class UtilityExtensions
     {
         /****************************************************************************/
@@ -140,6 +146,15 @@ namespace Mondo.Common
         public static string ToLongString(this bool bValue)
         {
             return(bValue ? "True" : "False");
+        }        
+
+        /****************************************************************************/
+        public static long ValidateID(this long val)
+        {
+            if(val <= 0)
+              throw new ValueOutOfRangeException();
+
+            return val;
         }        
 
         /****************************************************************************/
@@ -1098,6 +1113,50 @@ namespace Mondo.Common
         }
 
         /****************************************************************************/
+        public static async Task<MemoryStream> StreamToStreamAsync(Stream objFrom)
+        {
+            if(objFrom is MemoryStream)
+                return(objFrom as MemoryStream);
+
+            const int    kBufferSize  = 65536;
+            int          nRead        = 0;
+            byte[]       aBuffer      = new byte[kBufferSize];
+            MemoryStream objStream    = new MemoryStream();
+            
+            try
+            {
+                // Reset the stream
+                if(objStream.CanSeek)
+                    objStream.Seek(0, SeekOrigin.Begin);
+
+                nRead = await objFrom.ReadAsync(aBuffer, 0, kBufferSize);
+                
+                while(nRead > 0)
+                {
+                    await objStream.WriteAsync(aBuffer, 0, nRead);
+                    nRead = await objFrom.ReadAsync(aBuffer, 0, kBufferSize);
+                }
+            }
+            catch(Exception ex)
+            {
+                objStream.Dispose();
+                objStream = null;
+
+                throw ex;
+            }
+            finally
+            {
+                // Reset the source stream
+                if(objFrom.CanSeek)
+                    objFrom.Seek(0, SeekOrigin.Begin);
+            }
+
+            objStream.Position = 0;
+            
+            return(objStream);
+        }
+
+        /****************************************************************************/
         public static string StreamToString(System.IO.Stream objBuffer)
         {
             StreamReader objReader = new StreamReader(objBuffer);   
@@ -1210,6 +1269,31 @@ namespace Mondo.Common
         }
 
         #endregion
+
+        /****************************************************************************/
+        public static byte[] XOR(byte[] a1, byte[] a2)
+        {
+            int iLength = a1.Length;
+            byte[] aResults = new byte[a1.Length];
+
+            for(int i = 0; i < iLength; ++i)
+                aResults[i] = (byte)(a1[i] ^ a2[i]);
+
+            return(aResults);
+        }
+
+        /****************************************************************************/
+        public static byte[] XOR(byte[] a1, byte[] a2, byte[] a3, byte[] a4)
+        {
+            byte[] p1 = XOR(a1, a2);
+            byte[] p2 = XOR(a3, a4);
+            byte[] p3 = XOR(p1, p2);
+
+            p1.Clear();
+            p2.Clear();
+
+            return(p3);
+        }
 
        /****************************************************************************/
         private Utility()

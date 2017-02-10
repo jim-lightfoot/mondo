@@ -3,12 +3,12 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{22A18106-5518-464F-B23A-CB5D5DAE279A}</ProjectGuid>
+    <ProjectGuid>{EE8E2D61-AFAD-45EA-98F3-58D432FDE05F}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Mondo.Test</RootNamespace>
-    <AssemblyName>Mondo.Test</AssemblyName>
-    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <RootNamespace>Mondo.Common.Test</RootNamespace>
+    <AssemblyName>Mondo.Common.Test</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
@@ -16,15 +16,6 @@
     <ReferencePath>$(ProgramFiles)\Common Files\microsoft shared\VSTT\$(VisualStudioVersion)\UITestExtensionPackages</ReferencePath>
     <IsCodedUITest>False</IsCodedUITest>
     <TestProjectType>UnitTest</TestProjectType>
-    <SccProjectName>
-    </SccProjectName>
-    <SccLocalPath>
-    </SccLocalPath>
-    <SccAuxPath>
-    </SccAuxPath>
-    <SccProvider>
-    </SccProvider>
-    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -63,15 +54,15 @@
   </Choose>
   <ItemGroup>
     <Compile Include="ApplicationContext.cs" />
-    <Compile Include="HtmlToXmlTest.cs" />
-    <Compile Include="Log.cs" />
-    <Compile Include="Globalization.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="StringExtensions.cs" />
-    <Compile Include="Config.cs" />
-    <Compile Include="IDataObjectSource.cs" />
-    <Compile Include="DiskFile.cs" />
     <Compile Include="CollectionExtensions.cs" />
+    <Compile Include="Config.cs" />
+    <Compile Include="DiskFile.cs" />
+    <Compile Include="IDataObjectSource.cs" />
+    <Compile Include="Log.cs" />
+    <Compile Include="Mondo.Common.DictionaryDataSource.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Query.cs" />
+    <Compile Include="StringExtensions.cs" />
     <Compile Include="Url.cs" />
     <Compile Include="XmlExtensions.cs" />
   </ItemGroup>
@@ -79,14 +70,6 @@
     <ProjectReference Include="..\Common\Mondo.Common.csproj">
       <Project>{59b005f5-d308-494c-bdf2-5b32ac7aa92d}</Project>
       <Name>Mondo.Common</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Globalization\Mondo.Globalization.csproj">
-      <Project>{a0c78f10-6d89-4bf9-9f13-dc13845309f0}</Project>
-      <Name>Mondo.Globalization</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Web\Mondo.Web.csproj">
-      <Project>{b246e87e-e045-4647-89ba-cfb15c47af63}</Project>
-      <Name>Mondo.Web</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

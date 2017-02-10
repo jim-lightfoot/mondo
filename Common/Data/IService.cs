@@ -20,6 +20,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Mondo.Common
 {
@@ -36,5 +37,6 @@ namespace Mondo.Common
     public interface ITask
     {
         void Run();
+        Task RunAsync();
     }  
 }

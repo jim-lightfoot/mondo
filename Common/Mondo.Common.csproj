@@ -102,8 +102,10 @@
     <Compile Include="Collections\LineList.cs" />
     <Compile Include="Config.cs" />
     <Compile Include="Data\BinaryWriter.cs" />
+    <Compile Include="Data\ISettingsStore.cs" />
     <Compile Include="Data\IEncryptor.cs" />
     <Compile Include="Data\ICache.cs" />
+    <Compile Include="Data\Query.cs" />
     <Compile Include="Logging\EmailLog.cs" />
     <Compile Include="Logging\Log.cs" />
     <Compile Include="Messaging\IMessageQueue.cs" />

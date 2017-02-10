@@ -185,6 +185,12 @@ namespace Mondo.Common
             if(objValue is IDataSourceContainer)
                 return((objValue as IDataSourceContainer).DataSource);
                 
+            if(objValue is IDictionary<string, string>)
+                return new DictionaryDataSource<string>(objValue as IDictionary<string, string>);
+                
+            if(objValue is IDictionary<string, object>)
+                return new DictionaryDataSource<object>(objValue as IDictionary<string, object>);
+                
             if(objValue is XmlNode)
                 return(new XmlObjectSource(objValue as XmlNode));
                 
@@ -375,6 +381,50 @@ namespace Mondo.Common
 
     /****************************************************************************/
     /****************************************************************************/
+    public class DictionaryDataSource<T> : DataObjectSource
+    {
+        private readonly IDictionary<string, T> _values;
+
+        /***********************************************************************/
+        public DictionaryDataSource(IDictionary<string, T> values)
+        {
+            _values = values;
+        }
+
+        /***********************************************************************/
+        public override string Get(string columnName, string defaultVal = "")
+        {
+            if(_values.ContainsKey(columnName))
+                return _values[columnName].ToString();
+
+            return defaultVal;
+        }
+
+        /***********************************************************************/
+        public override object GetObject(string columnName)
+        {
+            return _values[columnName];
+        }
+
+        /***********************************************************************/
+        public override IEnumerable         Columns    
+        {
+            get
+            {
+              return null;
+            }
+        }
+
+        /***********************************************************************/
+        public override void SetValue(string strColumnName, string strValue)
+        {
+            // This is readonly data source
+            throw new NotSupportedException();
+        }
+  }
+
+    /****************************************************************************/
+    /****************************************************************************/
     /// <summary>
     /// A DataObjectSource implementation for null data source
     /// </summary>
@@ -427,20 +477,20 @@ namespace Mondo.Common
         private DataRow m_objRow = null;
         private DataSet m_objDataSet = null;
 
-        /****************************************************************************/
+        /************************************************************************/
         public DBRow(DataRow objRow)
         {
             m_objRow = objRow;
         }
 
-        /****************************************************************************/
+        /************************************************************************/
         public DBRow(DataSet objDataSet)
         {
             m_objRow     = objDataSet.Tables[0].Rows[0];
             m_objDataSet = objDataSet;
         }
 
-        /****************************************************************************/
+        /************************************************************************/
         public DBRow(DataTable objTable)
         {
             m_objRow = objTable.Rows[0];
@@ -513,7 +563,12 @@ namespace Mondo.Common
         /****************************************************************************/
         public override object GetObject(string idColumn)
         {
-            return m_objRow[idColumn];
+            object obj = m_objRow[idColumn];
+
+            if(obj is DBNull)
+                return null;
+
+            return obj;
         }
 
         /****************************************************************************/

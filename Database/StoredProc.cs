@@ -38,35 +38,39 @@ namespace Mondo.Database
     /****************************************************************************/
     public class Operation : IDisposable 
     {
-        protected DbCommand m_objCommand = null;
-        protected Mondo.Database.Database m_objDatabase = null;
-        private bool m_bDisposeDB = false;
-        private string m_strName;
+        private readonly bool _dispose;
 
         /****************************************************************************/
-        protected Operation(Mondo.Database.Database db, string strName)
+        protected Operation(Mondo.Database.Database db, string name)
         {
-            m_objDatabase = db;
-            m_strName = strName;
+            this.Database = db;
+            this.Name     = name;
+
+            if(db == null)
+            {
+                db = Database.Create(null);
+                _dispose = true;
+            }
+            else
+                _dispose = false;
         }
 
         /****************************************************************************/
         protected Operation(string strName, IConfig config) : this(Database.Create(config), strName)
         {
-            m_bDisposeDB  = true;
+            _dispose  = true;
         }
 
         /****************************************************************************/
-        public virtual Mondo.Database.Database  Database    {get{return(m_objDatabase);} protected set{m_objDatabase = value;}}
-        public DbParameterCollection            Parameters  {get{return(m_objCommand.Parameters);}}
-        public string                           Name        {get{return(m_strName);}}
-        public int                              Timeout     {get{return(m_objCommand.CommandTimeout);} set{m_objCommand.CommandTimeout = value;}}
-        protected bool                          SetDispose  {set{m_bDisposeDB = value;}}
+        public virtual Mondo.Database.Database  Database    { get; protected set; }
+        public DbParameterCollection            Parameters  { get { return(this.Command.Parameters); }}
+        public string                           Name        { get; private set; }
+        public int                              Timeout     { get { return(this.Command.CommandTimeout);} set { this.Command.CommandTimeout = value;}}
 
         /****************************************************************************/
         public DbCommand Command         
         {
-            get { return(m_objCommand); }
+            get; protected set;
          }
 
         /****************************************************************************/
@@ -98,7 +102,7 @@ namespace Mondo.Database
         private DbParameter AddInputParam(string strName, DbType iType, int iLength, object objValue)
         {
             string      strSource = strName.Remove(0, 1);
-            DbParameter objParam  = m_objDatabase.CreateParameter(strName,
+            DbParameter objParam  = this.Database.CreateParameter(strName,
                                                                   iType,
                                                                   iLength,
                                                                   ParameterDirection.Input,
@@ -108,7 +112,7 @@ namespace Mondo.Database
                                                                   DataRowVersion.Default,
                                                                   objValue);
 
-            m_objCommand.Parameters.Add(objParam);
+            this.Command.Parameters.Add(objParam);
             return(objParam);
         }
 
@@ -189,7 +193,7 @@ namespace Mondo.Database
         /****************************************************************************/
         private void AddOutParam(SqlCommand objStoredProc)
         {
-            objStoredProc.Parameters.Add(m_objDatabase.CreateParameter("@strOutput",
+            objStoredProc.Parameters.Add(this.Database.CreateParameter("@strOutput",
                                                                         DbType.String,
                                                                         512,
                                                                         ParameterDirection.Output,
@@ -204,12 +208,13 @@ namespace Mondo.Database
 
         #region IDisposable Members
 
+        /****************************************************************************/
         public virtual void Dispose()
         {
-            m_objCommand.Dispose();
+            this.Command.Dispose();
 
-            if(m_bDisposeDB && m_objDatabase != null)
-                m_objDatabase.Dispose();
+            if(_dispose && this.Database != null)
+                this.Database.Dispose();
         }
 
         #endregion
@@ -219,20 +224,16 @@ namespace Mondo.Database
     /****************************************************************************/
     public class StoredProc : Operation 
     {
-        protected string m_strProcName;
-
         /****************************************************************************/
-        public StoredProc(Mondo.Database.Database db, string strProcName) : base(db, strProcName)
+        public StoredProc(Mondo.Database.Database db, string procName) : base(db, procName)
         {
-            m_strProcName = strProcName;
-            m_objCommand  = m_objDatabase.MakeCommand(this); 
+            this.Command = this.Database.MakeCommand(this); 
         }
 
         /****************************************************************************/
-        public StoredProc(string strProcName, IConfig config = null) : base(strProcName, config)
+        public StoredProc(string procName, IConfig config = null) : base(procName, config)
         {
-            m_strProcName = strProcName;
-            m_objCommand  = m_objDatabase.MakeCommand(this); 
+            this.Command = this.Database.MakeCommand(this); 
         }
 
         /****************************************************************************/
@@ -246,7 +247,7 @@ namespace Mondo.Database
             protected set
             {
                 base.Database = value;
-                m_objCommand  = m_objDatabase.MakeCommand(this); 
+                this.Command  = this.Database.MakeCommand(this); 
             }
         }
     }
@@ -258,7 +259,7 @@ namespace Mondo.Database
         /****************************************************************************/
         public TextCommand(Mondo.Database.Database db, string strSQL) : base(db, strSQL)
         {
-            m_objCommand  = m_objDatabase.MakeSelectCommand(strSQL); 
+            this.Command = this.Database.MakeSelectCommand(strSQL); 
         }
     }
 }

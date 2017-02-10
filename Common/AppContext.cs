@@ -32,17 +32,20 @@ namespace Mondo.Common
     /****************************************************************************/
     public interface IAppContext
     {
-        IConfig    Config          { get; }
-        ICache     Cache           { get; }
-        ILog       Log             { get; }
-        IEncryptor Encryptor       { get; }
+        IConfig         Config          { get; }
+        ICache          Cache           { get; }
+        ILog            Log             { get; }
+        IEncryptor      Encryptor       { get; }
+        ISettingsStore  Cookies         { get; }
+        ISettingsStore  Session         { get; }
                                    
-        bool       IsDebug         { get; }
-        string     Environment     { get; }
-        string     CurrentLanguage { get; }
+        bool            IsDebug         { get; }
+        string          Environment     { get; }
+        long            LocationID      { get; }
+        string          CurrentLanguage { get; }
 
-        void       Validate(ILog log = null);
-        string     MapPath(string path);
+        void            Validate(ILog log = null);
+        string          MapPath(string path);
     }
 
     /****************************************************************************/
@@ -80,10 +83,13 @@ namespace Mondo.Common
         public ICache               Cache           { get; protected set; }
         public ILog                 Log             { get; protected set; }
         public abstract IEncryptor  Encryptor       { get; }
-                           
+        public ISettingsStore       Cookies         { get; protected set; }
+        public ISettingsStore       Session         { get; protected set; }
+                 
         public bool                 IsDebug         { get; protected set; }
         public string               Environment     { get; protected set; }
         public virtual string       CurrentLanguage { get {return("eng"); }  }
+        public abstract long        LocationID      { get; }
 
         public abstract void        Validate(ILog log = null);
         public abstract string      MapPath(string path);

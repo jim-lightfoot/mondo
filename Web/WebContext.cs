@@ -40,8 +40,17 @@ namespace Mondo.Web
         /****************************************************************************/
         protected WebContext(bool config, bool log) : base(config, log)
         {
-            this.Cache = new Cache();
+            this.Cache   = new Cache();
+            this.Cookies = new WebCookies();
+            this.Session = new WebSession();
+
             WebUtil.Cache.AddSetting("AppContext", this);
+        }
+
+        /****************************************************************************/
+        public override long LocationID
+        {
+            get { return WebUtil.IPNumber; }
         }
 
         /****************************************************************************/
@@ -82,4 +91,52 @@ namespace Mondo.Web
             }
         }
     }
+
+    /****************************************************************************/
+    /****************************************************************************/
+    public class WebCookies : ISettingsStore
+    {
+        /****************************************************************************/
+        public string GetSetting(string name)
+        {
+    		return WebUtil.Cookie.Get(name);
+        }
+
+        /****************************************************************************/
+        public void AddSetting(string name, object value, int expires = 1, bool httpOnly = true, bool secure = true, string domain = "")
+        {
+            WebUtil.Cookie.Add(name, value.ToString(), expires, httpOnly, secure, domain);
+        }
+
+        /****************************************************************************/
+        public void RemoveSetting(string name, string domain = "")
+        {
+            WebUtil.Cookie.Remove(name, domain);
+        }
+    }
+
+    /****************************************************************************
+     * These are cookies that expire when the browser is closed
+    /****************************************************************************/
+    public class WebSession : ISettingsStore
+    {
+        /****************************************************************************/
+        public string GetSetting(string name)
+        {
+    		return WebUtil.BrowserSession.GetSetting(name);
+        }
+
+        /****************************************************************************/
+        public void AddSetting(string name, object value, int expires = 1, bool httpOnly = true, bool secure = true, string domain = "")
+        {
+            WebUtil.BrowserSession.AddSetting(name, value, domain);        
+        }
+
+        /****************************************************************************/
+        public void RemoveSetting(string name, string domain = "")
+        {
+            WebUtil.BrowserSession.RemoveSetting(name);
+        }
+    }
+
 }
