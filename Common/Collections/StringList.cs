@@ -61,15 +61,15 @@ namespace Mondo.Common
         }
 
         /****************************************************************************/
-        public StringList(string strList, string strSeparator, bool bRemoveEmptys, bool trim = true)
+        public StringList(string strList, string separator, bool bRemoveEmptys, bool trim = true)
         {
-            Parse(strList, strSeparator, bRemoveEmptys, trim);
+            Parse(strList, separator, bRemoveEmptys, trim);
         }
 
         /****************************************************************************/
-        protected void Parse(string strList, string strSeparator, bool bRemoveEmptys, bool bTrim = true)
+        protected void Parse(string strList, string separator, bool bRemoveEmptys, bool bTrim = true)
         {
-           string[] aParts = strList.Split(new string[] {strSeparator}, bRemoveEmptys ? StringSplitOptions.RemoveEmptyEntries : StringSplitOptions.None);
+           string[] aParts = strList.Split(new string[] {separator}, bRemoveEmptys ? StringSplitOptions.RemoveEmptyEntries : StringSplitOptions.None);
 
             foreach(string strPart in aParts)
                 Add(strPart, false, bTrim);
@@ -148,19 +148,19 @@ namespace Mondo.Common
         }
 
         /****************************************************************************/
-        public static string Pack(IEnumerable aItems, string strSeparator)
+        public static string Pack(IEnumerable aItems, string separator)
         {
             StringList aList = new StringList(aItems);
 
-            return(aList.Pack(strSeparator));
+            return(aList.Pack(separator));
         }
 
         /****************************************************************************/
-        public static string Pack(IEnumerable aItems, string strFormat, string strSeparator)
+        public static string Pack(IEnumerable aItems, string strFormat, string separator)
         {
             StringList aList = new StringList(aItems);
 
-            return(aList.Pack(strFormat, strSeparator));
+            return(aList.Pack(strFormat, separator));
         }
 
         /****************************************************************************/
@@ -168,25 +168,25 @@ namespace Mondo.Common
         /// Packs the given list into a single string separating them by the given separator.
         /// </summary>
         /// <param name="aItems">A list of string to pack</param>
-        /// <param name="strSeparator">A string that will separate the values</param>
+        /// <param name="separator">A string that will separate the values</param>
         /// <param name="bRemoveEmptys">Removes any empty strings if true</param>
         /// <returns>A string with the packed values</returns>
-        public static string Pack(IEnumerable aItems, string strSeparator, bool bRemoveEmptys)
+        public static string Pack(IEnumerable aItems, string separator, bool bRemoveEmptys)
         {
             StringList aList = new StringList(aItems, bRemoveEmptys);
 
-            return(aList.Pack(strSeparator));
+            return(aList.Pack(separator));
         }
 
         /****************************************************************************/
-        public string Pack(string strFormat, string strSeparator)
+        public string Pack(string strFormat, string separator)
         {
             StringBuilder sb = new StringBuilder();
 
             foreach(string strAdd in this)
             {
                 if(sb.Length != 0)
-                    sb.Append(strSeparator);
+                    sb.Append(separator);
 
                 if(strAdd == "")
                 {
@@ -203,12 +203,12 @@ namespace Mondo.Common
         }
 
         /****************************************************************************/
-        public void Pack(StringBuilder sb, string strFormat, string strSeparator)
+        public void Pack(StringBuilder sb, string strFormat, string separator)
         {
             foreach(string strAdd in this)
             {
                 if(sb.Length != 0)
-                    sb.Append(strSeparator);
+                    sb.Append(separator);
 
                 sb.AppendFormat(strFormat, strAdd);
             }
@@ -217,14 +217,14 @@ namespace Mondo.Common
         }
 
         /****************************************************************************/
-        public string Pack(string strSeparator)
+        public string Pack(string separator)
         {
             StringBuilder sb = new StringBuilder();
 
             foreach(string strAdd in this)
             {
                 if(sb.Length != 0)
-                    sb.Append(strSeparator);
+                    sb.Append(separator);
 
                 sb.Append(strAdd);
             }
@@ -268,23 +268,23 @@ namespace Mondo.Common
         /// separator and returns a List<string>, removing emptys if requested.
         /// </summary>
         /// <param name="strList">A string containing the list</param>
-        /// <param name="strSeparator">A string that separates the values</param>
+        /// <param name="separator">A string that separates the values</param>
         /// <param name="bRemoveEmptys">Removes any empty string if true</param>
         /// <returns>A StringCollection containing the list of strings</returns>
-        public static List<string> ParseString(string strList, string strSeparator, bool bRemoveEmptys)
+        public static List<string> ParseString(string strList, string separator, bool bRemoveEmptys)
         {
             List<string> aReturn = new List<string>();
 
             if(strList != null && strList.Length > 0)
             {
-                int iSepLen = strSeparator.Length;
+                int iSepLen = separator.Length;
                 string strTemp = strList;
 
                 while(true)
                 {
                     strTemp = strTemp.Trim();
 
-                    int iFind = strTemp.IndexOf(strSeparator);
+                    int iFind = strTemp.IndexOf(separator);
 
                     if(iFind == -1)
                     {
@@ -320,9 +320,9 @@ namespace Mondo.Common
         }
 
         /****************************************************************************/
-        public StringDictionary(string strList, string strSeparator)
+        public StringDictionary(string strList, string separator)
         {
-            string[] aStrings = strList.Split(new string[] {strSeparator}, StringSplitOptions.RemoveEmptyEntries);
+            string[] aStrings = strList.Split(new string[] {separator}, StringSplitOptions.RemoveEmptyEntries);
 
             foreach(string strValue in aStrings)
              {
@@ -333,13 +333,13 @@ namespace Mondo.Common
         }
 
         /****************************************************************************/
-        public StringDictionary(string strList, string strSeparator, string strSeparator2)
+        public StringDictionary(string strList, string separator, string separator2)
         {
-            string[] aStrings = strList.Split(new string[] {strSeparator}, StringSplitOptions.RemoveEmptyEntries);
+            string[] aStrings = strList.Split(new string[] {separator}, StringSplitOptions.RemoveEmptyEntries);
 
             foreach(string strValue in aStrings)
              {
-                string[] aPair = strValue.Split(new string[] {strSeparator2}, StringSplitOptions.None);
+                string[] aPair = strValue.Split(new string[] {separator2}, StringSplitOptions.None);
 
                 this.Add(aPair[0].Trim(), aPair[1].Trim());
              }

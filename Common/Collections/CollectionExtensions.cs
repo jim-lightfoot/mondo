@@ -65,6 +65,22 @@ namespace Mondo.Common
         }
 
         /****************************************************************************/
+        public static string Pack(this IEnumerable<object> list, string separator, Func<object, string> fn)
+        {
+            StringBuilder sb = new StringBuilder();
+
+            foreach(object item in list)
+            {
+                if(sb.Length != 0)
+                    sb.Append(separator);
+
+                sb.Append(fn(item));
+            }
+   
+            return(sb.ToString());
+        }
+
+        /****************************************************************************/
         private static XmlNode GetFormNode(StringList parts, int index, XmlNode parent, Dictionary<string, string> pluralTransforms = null)
         {
             XmlNode node  = parent;

@@ -6,6 +6,7 @@ using System.Xml;
 using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
+using Mondo.Common;
 using Mondo.Xml;
 using Mondo.Database;
 
@@ -162,5 +163,110 @@ namespace Mondo.Database.Test
             Assert.AreEqual(27,     dict["Age"]);
         }
 
+        [TestMethod]
+        public async Task Mondo_Database_ExecuteQuery()
+        {
+            var query = new Query();
+
+            query.SelectFrom("dbo.Customer");
+
+            var dict = await ExecuteQueryResult(query);
+
+            Assert.AreEqual("John", dict["Name"]);
+            Assert.AreEqual(27,     dict["Age"]);
+
+            /*******************************************************************************/
+            query = new Query();
+
+            query.SelectFrom("dbo.Customer")
+                 .Where("Name")
+                 .IsEqualTo("Fred");
+
+            dict = await ExecuteQueryResult(query);
+
+            Assert.AreEqual("Fred", dict["Name"]);
+            Assert.AreEqual(44,     dict["Age"]);
+
+            /*******************************************************************************/
+            query = new Query();
+
+            query.InsertInto("dbo.Customer")
+                 .Columns(new string[] {"Name", "Age"})
+                 .Values(new object[] {"Dino", 5});
+
+            await ExecuteQuery(query);
+
+            query.SelectFrom("dbo.Customer")
+                 .Where("Name")
+                 .IsEqualTo("Dino");
+
+            dict = await ExecuteQueryResult(query);
+
+            Assert.AreEqual("Dino", dict["Name"]);
+            Assert.AreEqual(5,     dict["Age"]);
+
+            await ExecuteQuery("DELETE FROM dbo.Customer WHERE Name = 'Dino'");
+
+            /*******************************************************************************/
+            query = new Query();
+
+            query.Update("dbo.Customer")
+                 .Set(new Dictionary<string, object> { 
+                                                        {"Age", 45}
+                                                     })
+                .Where("Name")
+                .IsEqualTo("Fred");
+
+            await ExecuteQuery(query);
+
+            query.SelectFrom("dbo.Customer")
+                 .Where("Name")
+                 .IsEqualTo("Fred");
+
+            dict = await ExecuteQueryResult(query);
+
+            Assert.AreEqual("Fred", dict["Name"]);
+            Assert.AreEqual(45,     dict["Age"]);
+
+            // Set it back
+            query.Update("dbo.Customer")
+                 .Set(new Dictionary<string, object> { 
+                                                        {"Age", 44}
+                                                     })
+                .Where("Name")
+                .IsEqualTo("Fred");
+
+            await ExecuteQuery(query);
+        }
+
+        /*******************************************************************************/
+        private async Task<IDictionary<string, object>> ExecuteQueryResult(Query query)
+        {
+            using(Database db = Database.Create(_connectionString,  false))
+            {
+                using(TextCommand sp = new TextCommand(db, query.ToString()))
+                {
+                    return await db.ExecuteSingleRecordDictionaryAsync(sp);
+                }
+            }
+        }
+
+        /*******************************************************************************/
+        private async Task ExecuteQuery(Query query)
+        {
+            await ExecuteQuery(query.ToString());
+        }
+
+        /*******************************************************************************/
+        private async Task ExecuteQuery(string text)
+        {
+            using(Database db = Database.Create(_connectionString, false))
+            {
+                using(TextCommand sp = new TextCommand(db, text))
+                {
+                    await db.DoTaskAsync(sp);
+                }
+            }
+        }
     }
 }

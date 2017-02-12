@@ -59,7 +59,7 @@
     <Compile Include="DiskFile.cs" />
     <Compile Include="IDataObjectSource.cs" />
     <Compile Include="Log.cs" />
-    <Compile Include="Mondo.Common.DictionaryDataSource.cs" />
+    <Compile Include="DictionaryDataSource.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Query.cs" />
     <Compile Include="StringExtensions.cs" />
