@@ -31,11 +31,9 @@ namespace Mondo.Common
     /****************************************************************************/
     public interface IMessageQueue
     {
-        void SendMessage(string message);
-        void Clear();
-
-        Task ProcessMessagesAsync(IMessageProcessor processor, CancellationToken cancelToken);
-        void ProcessMessages(IMessageProcessor processor, CancellationToken cancelToken);
+        Task SendMessage(string message);
+        Task Clear();
+        Task ProcessMessages(IMessageProcessor processor, CancellationToken cancelToken);
     }
 
     /****************************************************************************/
@@ -49,10 +47,8 @@ namespace Mondo.Common
     /****************************************************************************/
     public interface IMessageProcessor
     {
-        void ProcessMessage(string message, IMessageBatch batch);
-
-        bool HandleMessageError(Exception ex, string message);
-
+        Task          ProcessMessage(string message, IMessageBatch batch);
+        bool          HandleMessageError(Exception ex, string message);
         IMessageBatch StartBatch();
     }
 }
