@@ -49,9 +49,9 @@ namespace Mondo.Common
         /****************************************************************************/
 	    public static T GetSetting<T>(this ISettingsStore store, string name, T defaultVal = default(T)) where T : struct
 		{
-    		string val = store.GetSetting(name);
+    		object val = store.GetSetting(name);
 
-            if(string.IsNullOrWhiteSpace(val))
+            if(val == null)
               return defaultVal;
 
             return(Utility.Convert<T>(val, defaultVal));

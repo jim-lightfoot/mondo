@@ -25,9 +25,17 @@ using System.IO;
 using System.Net;
 using System.Net.Mail;
 using System.Diagnostics;
+using System.Threading.Tasks;
 
 namespace Mondo.Common
 {
+    /****************************************************************************/
+    /****************************************************************************/
+    public interface IEmailServerFactory 
+    {
+        IEmailServer Create(string server = "", int iPort = 0, string userName = "", string password = "");
+    }
+
     /****************************************************************************/
     /****************************************************************************/
     public interface IEmailServer : IDisposable
@@ -39,60 +47,55 @@ namespace Mondo.Common
     /****************************************************************************/
     public class SmtpServer : IEmailServer
     {
-        /****************************************************************************/
-        public SmtpServer(string strServer) 
+        private SmtpClient _client = null;
+
+        /****************************************************************************         
+           // If no params
+         
+               <system.net>
+                <mailSettings>
+                    <smtp>
+                    <network port="25" host="localhost" />
+                        ...or...
+                    <network port="25" host="mail.companyname.com" />
+                    </smtp>
+                </mailSettings>
+                </system.net>
+           
+         ****************************************************************************/
+        public SmtpServer(string server = "", int iPort = 0, string userName = "", string password = "") 
         {
-            //m_objClient = new SmtpClient(strServer);
-        }
+            if(!string.IsNullOrWhiteSpace(server))
+            {
+                _client = new SmtpClient(server);
 
-        /****************************************************************************/
-        public SmtpServer() 
-        {
-            /*
-             *   <system.net>
-                    <mailSettings>
-                      <smtp>
-                        <network port="25" host="localhost" />
-                            ...or...
-                        <network port="25" host="mail.companyname.com" />
-                      </smtp>
-                    </mailSettings>
-                  </system.net>
-             */
-        }       
+                if(!string.IsNullOrWhiteSpace(userName))
+                    _client.Credentials = new NetworkCredential(userName, password);
 
-        /****************************************************************************/
-        public SmtpServer(string strServer, int iPort, string strUserName, string strPassword) : this(strServer)
-        {
-           // m_objClient.Credentials = new NetworkCredential(strUserName, strPassword);
-
-          //  if(iPort != 0)
-           //     m_objClient.Port = iPort;
-        }
-
-        /****************************************************************************/
-        protected SmtpServer(SmtpClient client)
-        {
-          //  m_objClient = client;
-
-         //   if(m_objClient.Host.ToLower().Contains("local"))
-          //      m_objClient.DeliveryMethod = SmtpDeliveryMethod.PickupDirectoryFromIis;
+                if(iPort != 0)
+                    _client.Port = iPort;
+            }
         }
 
         /****************************************************************************/
         public void Send(Email email)
         {
-            using(SmtpClient client = new SmtpClient())
-                client.Send(email.InternalMessage);
+            if(_client != null)
+                _client.Send(email.InternalMessage);
+            else
+            { 
+                using(SmtpClient client = new SmtpClient())
+                    client.Send(email.InternalMessage);
+            }
         }
 
         /****************************************************************************/
         public void Dispose()
         {
-            //if(m_objClient != null)
+            if(_client != null)
             { 
-            //    m_objClient.Dispose();
-             //   m_objClient = null;
+                _client.Dispose();
+                _client = null;
             }
         }
     }
@@ -101,22 +104,22 @@ namespace Mondo.Common
     /****************************************************************************/
     public class Email : IDisposable
     {
-        private readonly MailMessage  m_objMessage = new MailMessage();
-        private readonly IEmailServer m_mailServer;
-        private readonly bool         m_disposeMailServer;
+        private readonly MailMessage  _message = new MailMessage();
+        private readonly IEmailServer _mailServer;
+        private readonly bool         _disposeMailServer;
 
         /****************************************************************************/
         public Email(IEmailServer mailServer = null)
         {
             if(mailServer == null)
             {
-                m_mailServer = new SmtpServer();
-                m_disposeMailServer = true;
+                _mailServer = new SmtpServer();
+                _disposeMailServer = true;
             }
             else
             {
-                m_mailServer = mailServer;
-                m_disposeMailServer = false;
+                _mailServer = mailServer;
+                _disposeMailServer = false;
             }
         }
 
@@ -135,7 +138,7 @@ namespace Mondo.Common
         {
             try
             {
-                m_objMessage.Dispose();
+                _message.Dispose();
             }
             catch
             {
@@ -143,8 +146,8 @@ namespace Mondo.Common
 
             try
             {
-                if(m_disposeMailServer && m_mailServer != null)
-                    m_mailServer.Dispose();
+                if(_disposeMailServer && _mailServer != null)
+                    _mailServer.Dispose();
             }
             catch
             {
@@ -154,7 +157,7 @@ namespace Mondo.Common
         /****************************************************************************/
         internal MailMessage InternalMessage
         {
-            get { return(m_objMessage); }
+            get { return(_message); }
         }
 
         /****************************************************************************/
@@ -162,7 +165,7 @@ namespace Mondo.Common
         {
             get
             {
-                return(m_objMessage.From.Address);
+                return(_message.From.Address);
             }
 
             set
@@ -172,26 +175,26 @@ namespace Mondo.Common
 
                 if(strDisplay != "")
                 {
-                    m_objMessage.From = new MailAddress(strEmail, strDisplay);
+                    _message.From = new MailAddress(strEmail, strDisplay);
                     return;
                 }
 
-                m_objMessage.From = new MailAddress(strEmail);
+                _message.From = new MailAddress(strEmail);
             }
         }
 
         /****************************************************************************/
-        public static string ExtractAddress(string strValue, ref string strDisplay)
+        public static string ExtractAddress(string value, ref string display)
         {        
-            string strEmail = strValue.Trim();
-            strDisplay = "";
+            string emailAddress = value.Trim();
+                   display = "";
                 
-            if(!SplitAddress(ref strEmail, ref strDisplay, "[", "]"))
-                SplitAddress(ref strEmail, ref strDisplay, "<", ">");
+            if(!SplitAddress(ref emailAddress, ref display, "[", "]"))
+                SplitAddress(ref emailAddress, ref display, "<", ">");
 
-            strEmail = strEmail.Replace("\"", "");
+            emailAddress = emailAddress.Replace("\"", "");
 
-            return(strEmail);
+            return(emailAddress);
         }
 
         /****************************************************************************/
@@ -199,12 +202,12 @@ namespace Mondo.Common
         {
             get
             {
-                return(new StringList(m_objMessage.To).Pack("; "));
+                return(new StringList(_message.To).Pack("; "));
             }
 
             set
             {
-                m_objMessage.To.Clear();
+                _message.To.Clear();
 
                 AddRecipient(value);
             }
@@ -215,7 +218,7 @@ namespace Mondo.Common
         {
             get
             {
-                return(new StringList(m_objMessage.CC).Pack("; "));
+                return(new StringList(_message.CC).Pack("; "));
             }
         }
 
@@ -224,26 +227,26 @@ namespace Mondo.Common
         {
             get
             {
-                return(new StringList(m_objMessage.Bcc).Pack("; "));
+                return(new StringList(_message.Bcc).Pack("; "));
             }
         }
 
         /****************************************************************************/
-        public void AddRecipient(string strRecipientList)       
+        public void AddRecipient(string recipientList)       
         {
-            _AddRecipient(strRecipientList, m_objMessage.To);
+            _AddRecipient(recipientList, _message.To);
         }
 
         /****************************************************************************/
-        public void AddCC(string strRecipientList)       
+        public void AddCC(string recipientList)       
         {
-            _AddRecipient(strRecipientList, m_objMessage.CC);
+            _AddRecipient(recipientList, _message.CC);
         }
 
         /****************************************************************************/
-        public void AddBCC(string strRecipientList)       
+        public void AddBCC(string recipientList)       
         {
-            _AddRecipient(strRecipientList, m_objMessage.Bcc);
+            _AddRecipient(recipientList, _message.Bcc);
         }
 
         /****************************************************************************/
@@ -258,8 +261,8 @@ namespace Mondo.Common
         /****************************************************************************/
         public void AddRecipients(IEnumerable aRecipients)       
         {
-            foreach(object objRecipient in aRecipients)
-                AddRecipient(objRecipient.ToString());
+            foreach(object recipient in aRecipients)
+                AddRecipient(recipient.ToString());
 
             return;
         }
@@ -267,31 +270,31 @@ namespace Mondo.Common
         /****************************************************************************/
         public string Subject     
         {
-            get {return(m_objMessage.Subject);}
-            set {m_objMessage.Subject = value;}
+            get {return(_message.Subject);}
+            set {_message.Subject = value;}
         }
 
         /****************************************************************************/
         public string Body
         {
-            get {return(m_objMessage.Body);}
-            set {m_objMessage.Body = value;}
+            get {return(_message.Body);}
+            set {_message.Body = value;}
         }
 
         /****************************************************************************/
         public bool IsBodyHtml  
         {
-            get {return(m_objMessage.IsBodyHtml);}
-            set { m_objMessage.IsBodyHtml = value; }
+            get {return(_message.IsBodyHtml);}
+            set { _message.IsBodyHtml = value; }
         }
-        public AttachmentCollection Attachments {get{return(m_objMessage.Attachments);}}
+        public AttachmentCollection Attachments {get{return(_message.Attachments);}}
 
         /****************************************************************************/
         public void AddAttachment(Stream objStream, string strName)      
         {
-            Attachment objAttachment = new Attachment(objStream, strName, System.Net.Mime.MediaTypeNames.Application.Octet);
+            Attachment attachment = new Attachment(objStream, strName, System.Net.Mime.MediaTypeNames.Application.Octet);
 
-            this.Attachments.Add(objAttachment);
+            this.Attachments.Add(attachment);
 
             return;
         }
@@ -301,20 +304,20 @@ namespace Mondo.Common
         {
             get
             {
-                StringList   aTo = new StringList();
+                StringList    aTo = new StringList();
                 StringBuilder sb = new StringBuilder();
 
-                foreach(MailAddress objAddress in m_objMessage.To)
-                    aTo.Add(DisplayName(objAddress));
+                foreach(MailAddress mailAddress in _message.To)
+                    aTo.Add(DisplayName(mailAddress));
 
                 sb.Append("From: ");
-                sb.AppendLine(DisplayName(m_objMessage.From));
+                sb.AppendLine(DisplayName(_message.From));
                 sb.Append("To: ");
                 sb.AppendLine(aTo.Pack(", "));
                 sb.Append("Subject: ");
-                sb.AppendLine(m_objMessage.Subject);
+                sb.AppendLine(_message.Subject);
                 sb.AppendLine("");
-                sb.AppendLine(m_objMessage.Body);
+                sb.AppendLine(_message.Body);
 
                 return(sb.ToString());
             }
@@ -323,7 +326,7 @@ namespace Mondo.Common
         /****************************************************************************/
         public void Send()
         {
-            this.m_mailServer.Send(this);
+            this._mailServer.Send(this);
         }
 
         /****************************************************************************/
@@ -400,14 +403,14 @@ namespace Mondo.Common
         }
 
         /****************************************************************************/
-        private static string DisplayName(MailAddress objAddress)
+        private static string DisplayName(MailAddress mailAddress)
         {
-            if(objAddress != null)
+            if(mailAddress != null)
             {
-                string strAddress = objAddress.DisplayName;
+                string strAddress = mailAddress.DisplayName;
 
                 if(strAddress == "")
-                    strAddress = objAddress.Address;
+                    strAddress = mailAddress.Address;
 
                 return(strAddress);
             }
@@ -416,7 +419,7 @@ namespace Mondo.Common
         }
 
         /****************************************************************************/
-        private static void _AddRecipient(string strRecipientList, MailAddressCollection aAddresses)       
+        private static void _AddRecipient(string recipientList, MailAddressCollection aAddresses)       
         {
             string strOverride = Config.Get("EmailOverride");
 
@@ -427,22 +430,22 @@ namespace Mondo.Common
             }
             else
             { 
-                StringList aRecipients = new StringList(strRecipientList.Normalized().Replace(",", ";").Replace(" ", ";").Replace("\r\n", ";").Replace("\r", ";").Replace("\n", ";"), ";", true);
+                StringList aRecipients = new StringList(recipientList.Normalized().Replace(",", ";").Replace(" ", ";").Replace("\r\n", ";").Replace("\r", ";").Replace("\n", ";"), ";", true);
 
                 foreach(string strRecipient in aRecipients)
                 {
-                    MailAddress objAddress = null;
+                    MailAddress mailAddress = null;
 
                     try
                     {
-                        objAddress = new MailAddress(strRecipient);
+                        mailAddress = new MailAddress(strRecipient);
                     }
                     catch(Exception ex)
                     {
                         throw new Exception("Invalid email address: " + strRecipient, ex);
                     }
 
-                    aAddresses.Add(objAddress);
+                    aAddresses.Add(mailAddress);
                 }
             }
 

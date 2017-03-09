@@ -943,6 +943,20 @@ namespace Mondo.Database
         }
 
         /****************************************************************************/
+        public async Task<byte[]> QueryBinaryAsync(Operation objProc)
+        {
+            return await QueryBinaryAsync(objProc.Command);
+        }
+
+        /****************************************************************************/
+        public async Task<byte[]> QueryBinaryAsync(DbCommand cmd)
+        {
+            object objResult = await ExecuteScalarAsync(cmd);
+
+            return(objResult as byte[]);
+        }
+
+        /****************************************************************************/
         public object ExecuteScalar(string strSelect)
         {
             using(DbCommand cmd = MakeSelectCommand(strSelect))

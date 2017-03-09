@@ -43,6 +43,7 @@ namespace Mondo.Web
             this.Cache   = new Cache();
             this.Cookies = new WebCookies();
             this.Session = new WebSession();
+            this.Request = new WebRequest();
 
             WebUtil.Cache.AddSetting("AppContext", this);
         }
@@ -94,10 +95,10 @@ namespace Mondo.Web
 
     /****************************************************************************/
     /****************************************************************************/
-    public class WebCookies : ISettingsStore
+    internal class WebCookies : ISettingsStore
     {
         /****************************************************************************/
-        public string GetSetting(string name)
+        public object GetSetting(string name)
         {
     		return WebUtil.Cookie.Get(name);
         }
@@ -118,10 +119,10 @@ namespace Mondo.Web
     /****************************************************************************
      * These are cookies that expire when the browser is closed
     /****************************************************************************/
-    public class WebSession : ISettingsStore
+    internal class WebSession : ISettingsStore
     {
         /****************************************************************************/
-        public string GetSetting(string name)
+        public object GetSetting(string name)
         {
     		return WebUtil.BrowserSession.GetSetting(name);
         }
@@ -139,4 +140,27 @@ namespace Mondo.Web
         }
     }
 
+    /****************************************************************************
+     * These settings are for the lifetime of the page request
+    /****************************************************************************/
+    internal class WebRequest : ISettingsStore
+    {
+        /****************************************************************************/
+        public object GetSetting(string name)
+        {
+    		return WebUtil.PageRequest.GetSetting(name);
+        }
+
+        /****************************************************************************/
+        public void AddSetting(string name, object value, int expires = 1, bool httpOnly = true, bool secure = true, string domain = "")
+        {
+            WebUtil.PageRequest.AddSetting(name, value.ToString());        
+        }
+
+        /****************************************************************************/
+        public void RemoveSetting(string name, string domain = "")
+        {
+            WebUtil.PageRequest.RemoveSetting(name);
+        }
+    }
 }

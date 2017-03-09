@@ -38,6 +38,7 @@ namespace Mondo.Common
         IEncryptor      Encryptor       { get; }
         ISettingsStore  Cookies         { get; }
         ISettingsStore  Session         { get; }
+        ISettingsStore  Request         { get; }
                                    
         bool            IsDebug         { get; }
         string          Environment     { get; }
@@ -85,6 +86,7 @@ namespace Mondo.Common
         public abstract IEncryptor  Encryptor       { get; }
         public ISettingsStore       Cookies         { get; protected set; }
         public ISettingsStore       Session         { get; protected set; }
+        public ISettingsStore       Request         { get; protected set; }
                  
         public bool                 IsDebug         { get; protected set; }
         public string               Environment     { get; protected set; }

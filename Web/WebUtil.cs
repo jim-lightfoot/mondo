@@ -76,6 +76,12 @@ namespace Mondo.Web
         }
 
         /*************************************************************************/
+        public static void Redirect(string path)
+        {
+            HttpContext.Current.Response.Redirect("~/");
+        }
+
+        /*************************************************************************/
         public static string RelativePath(string path)
         {
             if(path.StartsWith("~/"))
@@ -93,7 +99,7 @@ namespace Mondo.Web
         {
             if(path.StartsWith("~/"))
             {
-                string strWebPath = System.Web.Hosting.HostingEnvironment.MapPath("~/d.html");
+                string strWebPath = MapPath("~/d.html");
 
                 strWebPath = strWebPath.Substring(0, strWebPath.Length - "d.html".Length) + path.Substring(1);
 
@@ -109,7 +115,7 @@ namespace Mondo.Web
             if(path.StartsWith("http", StringComparison.CurrentCultureIgnoreCase))
                 return(path);
 
-            string webPath = System.Web.Hosting.HostingEnvironment.MapPath("~/d.html");
+            string webPath = MapPath("~/d.html");
 
             webPath = webPath.Substring(0, webPath.Length - "d.html".Length);
 
@@ -135,7 +141,7 @@ namespace Mondo.Web
         /*************************************************************************/
         public static string MapPath(string path)
         {
-            return(System.Web.Hosting.HostingEnvironment.MapPath(path));
+            return System.Web.Hosting.HostingEnvironment.MapPath(path);
         }
 
         /*************************************************************************/
@@ -233,7 +239,7 @@ namespace Mondo.Web
         {
             get
             {
-                return(HttpContext.Current.Request.Url.ToString().ToLower());
+                return HttpContext.Current.Request.Url.ToString().ToLower();
             }            
         }
 

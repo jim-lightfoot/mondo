@@ -38,7 +38,7 @@ namespace Mondo.Database
     /****************************************************************************/
     public class Operation : IDisposable 
     {
-        private readonly bool _dispose;
+        private bool _dispose = false;
 
         /****************************************************************************/
         protected Operation(Mondo.Database.Database db, string name)
@@ -53,6 +53,15 @@ namespace Mondo.Database
             }
             else
                 _dispose = false;
+        }
+
+        /****************************************************************************/
+        protected bool SetDispose
+        {
+            set
+            {
+                _dispose = value;
+            }
         }
 
         /****************************************************************************/
