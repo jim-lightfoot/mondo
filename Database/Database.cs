@@ -1,10 +1,10 @@
 /****************************************************************************/
 /*                                                                          */
-/*    The Mondo Libraries  						    */
+/*    The Mondo Libraries  						                            */
 /*                                                                          */
-/*        Namespace: Mondo.Database					    */
-/*             File: Database.cs					    */
-/*        Class(es): Database						    */
+/*        Namespace: Mondo.Database					                        */
+/*             File: Database.cs					                        */
+/*        Class(es): Database						                        */
 /*          Purpose: A connection to a database                             */
 /*                                                                          */
 /*  Original Author: Jim Lightfoot                                          */
@@ -117,11 +117,11 @@ namespace Mondo.Database
 	/// </summary>
 	public abstract class Database : Openable
     {
-        protected string                    _connectionString = "";
-        private   DbConnection              _connection       = null;
-        private   DbTransaction             _transaction      = null;
+        protected        string             _connectionString = "";
+        private          DbConnection       _connection       = null;
+        private          DbTransaction      _transaction      = null;
         private readonly DbProviderFactory  _factory;
-        private readonly RetryPolicy        _retryPolicy = new DatabaseRetryPolicy();
+        private readonly RetryPolicy        _retryPolicy      = new DatabaseRetryPolicy();
 
         private static string[] _aOLEDBProviders = new string[] { "msdaora", "oledb", "sqlncl", "mysqlprov" };
         private static string[] _aODBCProviders = new string[] { "odbc", "sql server native client", "sql native client", "driver={mysql}", "orahome92" };
