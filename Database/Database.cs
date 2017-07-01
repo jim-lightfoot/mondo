@@ -1,10 +1,10 @@
 /****************************************************************************/
 /*                                                                          */
-/*    The Mondo Libraries  							                        */
+/*    The Mondo Libraries  						    */
 /*                                                                          */
-/*        Namespace: Mondo.Database							                */
-/*             File: Database.cs										    */
-/*        Class(es): Database										        */
+/*        Namespace: Mondo.Database					    */
+/*             File: Database.cs					    */
+/*        Class(es): Database						    */
 /*          Purpose: A connection to a database                             */
 /*                                                                          */
 /*  Original Author: Jim Lightfoot                                          */
