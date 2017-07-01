@@ -1,10 +1,10 @@
 ﻿/****************************************************************************/
 /*                                                                          */
-/*    The Mondo Libraries  	                                                */
+/*    The Mondo Libraries  	                                            */
 /*                                                                          */
-/*        Namespace: Mondo.Web							                    */
-/*             File: WebUtil.cs										        */
-/*        Class(es): WebUtil										        */
+/*        Namespace: Mondo.Web						    */
+/*             File: WebUtil.cs						    */
+/*        Class(es): WebUtil						    */
 /*          Purpose: Web specific utility functions                         */
 /*                                                                          */
 /*  Original Author: Jim Lightfoot                                          */
@@ -18,6 +18,7 @@
 /****************************************************************************/
 
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Text;
 using System.Web;
@@ -41,6 +42,8 @@ namespace Mondo.Web
         {
             get
             {
+                // ??? IPv6 are 128 bits. Need to change this to a guid
+
               #if DEBUG
                 // For some reason internal network IPs fail
                 return(32767);
@@ -78,7 +81,7 @@ namespace Mondo.Web
         /*************************************************************************/
         public static void Redirect(string path)
         {
-            HttpContext.Current.Response.Redirect("~/");
+            HttpContext.Current.Response.Redirect(path);
         }
 
         /*************************************************************************/
@@ -289,12 +292,12 @@ namespace Mondo.Web
                         objCookie = new HttpCookie(name);
 
                     objCookie.Value     = WebUtil.UrlEncode(strValue);
-                    objCookie.Shareable = false;
-                    objCookie.HttpOnly  = bHttpOnly;
-                    objCookie.Secure    = bSecure;
+                    objCookie.Shareable = true; /// false;
+                    objCookie.HttpOnly  = false; /// bHttpOnly;
+                    objCookie.Secure    = false; /// bSecure;
 
-                    if(strDomain != "")
-                        objCookie.Domain = strDomain;
+                    //if(strDomain != "")
+                    //    objCookie.Domain = strDomain;
 
                     if(nExpires == Cookie.Session)
                         objCookie.Expires = DateTime.MinValue;
@@ -314,6 +317,7 @@ namespace Mondo.Web
                 try
                 {
                     // Remove the cookie from the Request so that it is no longer available server-side
+                    HttpContext.Current.Request.Cookies.Remove(name);
                     HttpContext.Current.Request.Cookies.Remove(name);
 
                     // Ensure it is deleted from the user's browser

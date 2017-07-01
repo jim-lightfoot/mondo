@@ -18,7 +18,7 @@ namespace Mondo.Database.Test
         private const string _connectionString = "Data Source=OFFICEDESKTOP;Initial Catalog=MondoTest;Integrated Security=SSPI;";
 
         [TestMethod]
-        public void Mondo_Database_ExecuteXml()
+        public async Task Mondo_Database_ExecuteXml()
         {
             string xml = "";
 
@@ -30,7 +30,7 @@ namespace Mondo.Database.Test
                     { 
                         using(DbDataReader reader = db.ExecuteSelect(sp.Command))
                         {
-                            xml = Database.ToXmlAsync(reader, "Database", new List<string> {"Customer"} ).Result;
+                            xml = await Database.ToXmlAsync(reader, "Database", new List<string> {"Customer"} );
                         }
                     }
                 }
@@ -108,45 +108,6 @@ namespace Mondo.Database.Test
         }
 
         [TestMethod]
-        public void Mondo_Database_ExecuteXml_4()
-        {
-            string xml = "";
-            DateTime dtStart = DateTime.Now;
-            XmlDocument syncDoc = null;
-
-            using(Database db = Database.Create(_connectionString,  false))
-            {
-                using(StoredProc sp = new StoredProc(db, "dbo.GetCustomers"))
-                {
-                    using(db.Acquire)
-                    { 
-                        syncDoc = db.ExecuteXml(sp, "Zoomla", new List<string> {"Customer", "Promotion", "PromotionChannel"} );
-                    }
-                }
-            }
-
-            DateTime dtMiddle = DateTime.Now;
-
-
-            using(Database db = Database.Create(_connectionString,  false))
-            {
-                using(StoredProc sp = new StoredProc(db, "dbo.GetCustomers"))
-                {
-                    xml = db.ExecuteXmlAsync(sp, "Database", new List<string> {"Customer", "Promotion", "PromotionChannel"} ).Result;
-                }
-            }
-
-            XmlDocument asyncDoc = XmlDoc.LoadXml(xml);
-
-            DateTime dtEnd = DateTime.Now;
-
-            TimeSpan syncDuration  = dtMiddle - dtStart;
-            TimeSpan asyncDuration = dtEnd - dtMiddle;
-
-            Assert.IsTrue(syncDuration.Ticks > asyncDuration.Ticks);
-        }
-
-        [TestMethod]
         public async Task Mondo_Database_ExecuteSingleRecordDictionary()
         {
             IDictionary<string, object> dict = null;
@@ -161,6 +122,23 @@ namespace Mondo.Database.Test
 
             Assert.AreEqual("John", dict["Name"]);
             Assert.AreEqual(27,     dict["Age"]);
+        }
+
+        [TestMethod]
+        public async Task Mondo_Database_ExecuteSingleRecordDictionary_wmap()
+        {
+            IDictionary<string, object> dict = null;
+
+            using(Database db = Database.Create(_connectionString,  false))
+            {
+                using(StoredProc sp = new StoredProc(db, "dbo.GetCustomerList"))
+                {
+                    dict = await db.ExecuteSingleRecordDictionaryAsync(sp, new Dictionary<string, string> { {"Name", "FullName" }, { "Age", "ActualAge"} });
+                }
+            }
+
+            Assert.AreEqual("John", dict["FullName"]);
+            Assert.AreEqual(27,     dict["ActualAge"]);
         }
 
         [TestMethod]

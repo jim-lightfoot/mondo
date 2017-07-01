@@ -166,9 +166,9 @@ namespace Mondo.Security
 
                 chDecrypted.Clear();
 
-                return(strDecrypted.Replace(((char)6).ToString(), "")); // Was getting wierd char problems
+                return(strDecrypted.Replace(((char)6).ToString(), "")); // Was getting weird char problems
             }
-            catch
+            catch(Exception ex)
             {
                 return(strEncrypted);
             }

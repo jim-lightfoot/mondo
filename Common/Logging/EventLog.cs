@@ -1,16 +1,16 @@
 /****************************************************************************/
 /*                                                                          */
-/*    The Mondo Libraries  							                        */
+/*    The Mondo Libraries  						    */
 /*                                                                          */
-/*        Namespace: Mondo.Common							                */
-/*             File: EventLog.cs										    */
-/*        Class(es): EventLog										        */
+/*        Namespace: Mondo.Common					    */
+/*             File: EventLog.cs					    */
+/*        Class(es): EventLog						   */
 /*          Purpose: Writes to the event log                                */
 /*                                                                          */
 /*  Original Author: Jim Lightfoot                                          */
 /*    Creation Date: 19 Sep 2001                                            */
 /*                                                                          */
-/*   Copyright (c) 2001-2016 - Jim Lightfoot, All rights reserved           */
+/*   Copyright (c) 2001-2017 - Jim Lightfoot, All rights reserved           */
 /*                                                                          */
 /*  Licensed under the MIT license:                                         */
 /*    http://www.opensource.org/licenses/mit-license.php                    */
@@ -40,12 +40,12 @@ namespace Mondo.Common
     /// </summary>
     public sealed class EventLog : IEventLog, ILog
     {
-        private System.Diagnostics.EventLog m_objEventLog;
+        private System.Diagnostics.EventLog _eventLog;
 
         /****************************************************************************/
         public EventLog(System.Diagnostics.EventLog objEventLog = null)
         {
-            m_objEventLog = objEventLog;
+            _eventLog = objEventLog;
         }
 
         /****************************************************************************/
@@ -101,8 +101,8 @@ namespace Mondo.Common
         {
             try
             {
-                if(m_objEventLog != null)
-                    m_objEventLog.WriteEntry(strMessage, eType);
+                if(_eventLog != null)
+                    _eventLog.WriteEntry(strMessage, eType);
             }
             catch
             {

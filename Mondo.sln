@@ -1,13 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.40629.0
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mondo.Common", "Common\Mondo.Common.csproj", "{59B005F5-D308-494C-BDF2-5B32AC7AA92D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mondo.Database", "Database\Mondo.Database.csproj", "{4CC38FB7-682F-4D48-9DBC-27834B8AB6D0}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mondo.ApplicationInsights", "Mondo.ApplicationInsights\Mondo.ApplicationInsights.csproj", "{8137B778-BDBA-4749-BB0A-48241212BF51}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mondo.Web", "Web\Mondo.Web.csproj", "{B246E87E-E045-4647-89BA-CFB15C47AF63}"
 EndProject
@@ -26,11 +24,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Test", "Test", "{643627BA-6
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mondo.Database.Test", "Test\Mondo.Database.Test\Mondo.Database.Test.csproj", "{7FC4FB87-9063-47FE-A3D0-733023CDCA82}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mondo.Common.Test", "Mondo.Common.Test\Mondo.Common.Test.csproj", "{EE8E2D61-AFAD-45EA-98F3-58D432FDE05F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mondo.Common.Test", "Test\Mondo.Common.Test\Mondo.Common.Test.csproj", "{EE8E2D61-AFAD-45EA-98F3-58D432FDE05F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mondo.Web.Test", "Mondo.Web.Test\Mondo.Web.Test.csproj", "{DDE36AC2-24F1-4048-ACC1-65244A93B8B0}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mondo.Globalization.Test", "Test\Mondo.Globalization.Test\Mondo.Globalization.Test.csproj", "{6C859AD1-75E7-4D60-96CC-7229D90F653A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mondo.Globalization.Test", "Mondo.Globalization.Test\Mondo.Globalization.Test.csproj", "{6C859AD1-75E7-4D60-96CC-7229D90F653A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mondo.Web.Test", "Test\Mondo.Web.Test\Mondo.Web.Test.csproj", "{DDE36AC2-24F1-4048-ACC1-65244A93B8B0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mondo.ApplicationInsights", "ApplicationInsights\Mondo.ApplicationInsights.csproj", "{8137B778-BDBA-4749-BB0A-48241212BF51}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -56,14 +56,6 @@ Global
 		{4CC38FB7-682F-4D48-9DBC-27834B8AB6D0}.Release (No Deploy)|Any CPU.Build.0 = Release (No Deploy)|Any CPU
 		{4CC38FB7-682F-4D48-9DBC-27834B8AB6D0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4CC38FB7-682F-4D48-9DBC-27834B8AB6D0}.Release|Any CPU.Build.0 = Release|Any CPU
-		{8137B778-BDBA-4749-BB0A-48241212BF51}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{8137B778-BDBA-4749-BB0A-48241212BF51}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{8137B778-BDBA-4749-BB0A-48241212BF51}.Phone Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{8137B778-BDBA-4749-BB0A-48241212BF51}.Phone Debug|Any CPU.Build.0 = Debug|Any CPU
-		{8137B778-BDBA-4749-BB0A-48241212BF51}.Release (No Deploy)|Any CPU.ActiveCfg = Release|Any CPU
-		{8137B778-BDBA-4749-BB0A-48241212BF51}.Release (No Deploy)|Any CPU.Build.0 = Release|Any CPU
-		{8137B778-BDBA-4749-BB0A-48241212BF51}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{8137B778-BDBA-4749-BB0A-48241212BF51}.Release|Any CPU.Build.0 = Release|Any CPU
 		{B246E87E-E045-4647-89BA-CFB15C47AF63}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{B246E87E-E045-4647-89BA-CFB15C47AF63}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B246E87E-E045-4647-89BA-CFB15C47AF63}.Phone Debug|Any CPU.ActiveCfg = Phone Debug|Any CPU
@@ -104,14 +96,6 @@ Global
 		{EE8E2D61-AFAD-45EA-98F3-58D432FDE05F}.Release (No Deploy)|Any CPU.Build.0 = Release|Any CPU
 		{EE8E2D61-AFAD-45EA-98F3-58D432FDE05F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EE8E2D61-AFAD-45EA-98F3-58D432FDE05F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{DDE36AC2-24F1-4048-ACC1-65244A93B8B0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{DDE36AC2-24F1-4048-ACC1-65244A93B8B0}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{DDE36AC2-24F1-4048-ACC1-65244A93B8B0}.Phone Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{DDE36AC2-24F1-4048-ACC1-65244A93B8B0}.Phone Debug|Any CPU.Build.0 = Debug|Any CPU
-		{DDE36AC2-24F1-4048-ACC1-65244A93B8B0}.Release (No Deploy)|Any CPU.ActiveCfg = Release|Any CPU
-		{DDE36AC2-24F1-4048-ACC1-65244A93B8B0}.Release (No Deploy)|Any CPU.Build.0 = Release|Any CPU
-		{DDE36AC2-24F1-4048-ACC1-65244A93B8B0}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{DDE36AC2-24F1-4048-ACC1-65244A93B8B0}.Release|Any CPU.Build.0 = Release|Any CPU
 		{6C859AD1-75E7-4D60-96CC-7229D90F653A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{6C859AD1-75E7-4D60-96CC-7229D90F653A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6C859AD1-75E7-4D60-96CC-7229D90F653A}.Phone Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -120,6 +104,22 @@ Global
 		{6C859AD1-75E7-4D60-96CC-7229D90F653A}.Release (No Deploy)|Any CPU.Build.0 = Release|Any CPU
 		{6C859AD1-75E7-4D60-96CC-7229D90F653A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6C859AD1-75E7-4D60-96CC-7229D90F653A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DDE36AC2-24F1-4048-ACC1-65244A93B8B0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DDE36AC2-24F1-4048-ACC1-65244A93B8B0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DDE36AC2-24F1-4048-ACC1-65244A93B8B0}.Phone Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DDE36AC2-24F1-4048-ACC1-65244A93B8B0}.Phone Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DDE36AC2-24F1-4048-ACC1-65244A93B8B0}.Release (No Deploy)|Any CPU.ActiveCfg = Release|Any CPU
+		{DDE36AC2-24F1-4048-ACC1-65244A93B8B0}.Release (No Deploy)|Any CPU.Build.0 = Release|Any CPU
+		{DDE36AC2-24F1-4048-ACC1-65244A93B8B0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DDE36AC2-24F1-4048-ACC1-65244A93B8B0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8137B778-BDBA-4749-BB0A-48241212BF51}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8137B778-BDBA-4749-BB0A-48241212BF51}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8137B778-BDBA-4749-BB0A-48241212BF51}.Phone Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8137B778-BDBA-4749-BB0A-48241212BF51}.Phone Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8137B778-BDBA-4749-BB0A-48241212BF51}.Release (No Deploy)|Any CPU.ActiveCfg = Release|Any CPU
+		{8137B778-BDBA-4749-BB0A-48241212BF51}.Release (No Deploy)|Any CPU.Build.0 = Release|Any CPU
+		{8137B778-BDBA-4749-BB0A-48241212BF51}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8137B778-BDBA-4749-BB0A-48241212BF51}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -127,7 +127,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{7FC4FB87-9063-47FE-A3D0-733023CDCA82} = {643627BA-6DB2-4534-9E82-27CC3E0C6B92}
 		{EE8E2D61-AFAD-45EA-98F3-58D432FDE05F} = {643627BA-6DB2-4534-9E82-27CC3E0C6B92}
-		{DDE36AC2-24F1-4048-ACC1-65244A93B8B0} = {643627BA-6DB2-4534-9E82-27CC3E0C6B92}
 		{6C859AD1-75E7-4D60-96CC-7229D90F653A} = {643627BA-6DB2-4534-9E82-27CC3E0C6B92}
+		{DDE36AC2-24F1-4048-ACC1-65244A93B8B0} = {643627BA-6DB2-4534-9E82-27CC3E0C6B92}
 	EndGlobalSection
 EndGlobal

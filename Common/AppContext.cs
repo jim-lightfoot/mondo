@@ -1,11 +1,11 @@
 ﻿/****************************************************************************/
 /*                                                                          */
-/*    The Mondo Libraries  							                        */
+/*    The Mondo Libraries  						    */
 /*                                                                          */
-/*        Namespace: Mondo.Common							                */
-/*             File: AppContext.cs											*/
-/*        Class(es): AppContext, IAppContext								*/
-/*          Purpose: Provide an application wide context to all operations	*/
+/*        Namespace: Mondo.Common					    */
+/*             File: AppContext.cs					    */
+/*        Class(es): AppContext, IAppContext				    */
+/*          Purpose: Provide an application wide context to all operations  */
 /*                                                                          */
 /*  Original Author: Jim Lightfoot                                          */
 /*                                                                          */

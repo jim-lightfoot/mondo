@@ -1,10 +1,10 @@
 /****************************************************************************/
 /*                                                                          */
-/*    Mondo Libraries  							                            */
+/*    Mondo Libraries  							    */
 /*                                                                          */
-/*        Namespace: Mondo.Web       							            */
-/*             File: HtmlToXml.cs								            */
-/*        Class(es): HtmlToXml				                                */
+/*        Namespace: Mondo.Web       					    */
+/*             File: HtmlToXml.cs					    */
+/*        Class(es): HtmlToXml				                    */
 /*          Purpose: Cleans-up html and converts it to xhtml (xml)          */
 /*                                                                          */
 /*  Original Author: Jim Lightfoot                                          */
@@ -59,7 +59,7 @@ namespace Mondo.Web
             }
         }
     
-        /**************************************************************/
+        /*********************************************************************/
         public void WriteIndentation(StringBuilder sb, int iLevel)
         {
             if(this.WriteNewLines)

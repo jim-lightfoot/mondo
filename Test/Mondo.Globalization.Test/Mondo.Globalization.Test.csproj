@@ -54,11 +54,11 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Common\Mondo.Common.csproj">
+    <ProjectReference Include="..\..\Common\Mondo.Common.csproj">
       <Project>{59b005f5-d308-494c-bdf2-5b32ac7aa92d}</Project>
       <Name>Mondo.Common</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Globalization\Mondo.Globalization.csproj">
+    <ProjectReference Include="..\..\Globalization\Mondo.Globalization.csproj">
       <Project>{a0c78f10-6d89-4bf9-9f13-dc13845309f0}</Project>
       <Name>Mondo.Globalization</Name>
     </ProjectReference>

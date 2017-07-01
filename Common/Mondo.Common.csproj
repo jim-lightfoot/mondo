@@ -106,6 +106,7 @@
     <Compile Include="Data\IEncryptor.cs" />
     <Compile Include="Data\ICache.cs" />
     <Compile Include="Data\Query.cs" />
+    <Compile Include="Fallback.cs" />
     <Compile Include="Logging\EmailLog.cs" />
     <Compile Include="Logging\Log.cs" />
     <Compile Include="Messaging\IMessageQueue.cs" />

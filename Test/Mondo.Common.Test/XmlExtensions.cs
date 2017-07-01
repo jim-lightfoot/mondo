@@ -40,7 +40,7 @@ namespace Mondo.Test
             XmlDocument xmlTest = TestData;
 
             Assert.AreEqual("Jones", xmlTest.SelectSingleNode("//Row1").GetChildText("Column1"));
-       }
+        }
 
         [TestMethod]
         public void Mondo_Common_XmlExtensions_GetChildAttribute()
@@ -54,6 +54,42 @@ namespace Mondo.Test
             Assert.AreEqual(679856899, xmlTest.SelectSingleNode("//Row1").GetChildAttribute<long>("Column1", "id"));
             Assert.AreEqual(new DateTime(1981, 11, 09), xmlTest.SelectSingleNode("//Row1").GetChildAttribute<DateTime>("Column1", "born"));
             Assert.AreEqual(Guid.Parse("AF5B98A1-196D-4773-ADE1-1817A8D8BBDD"), xmlTest.SelectSingleNode("//Row1").GetChildAttribute<Guid>("Column1", "guid"));
+        }
+
+        [TestMethod]
+        public void Mondo_Common_XmlExtensions_ToJSON()
+        {
+           XmlDocument xmlTest1 = XmlDoc.LoadXml("<Test> " +
+                                                 "  <Manufacturer>Chevy</Manufacturer>" + 
+                                                 "  <Model>Camaro</Model>" + 
+                                                 "</Test>");
+
+            Assert.AreEqual("{\"Test\":{\"Manufacturer\":\"Chevy\",\"Model\":\"Camaro\"}}", xmlTest1.ToJSON().Replace(" ", "").Replace("\r", "").Replace("\n", ""));
+
+           XmlDocument xmlTest2 = XmlDoc.LoadXml("<Test> " +
+                                                 "  <List name=\"Vehicles\">" + 
+                                                 "    <Vehicle>" + 
+                                                 "      <Manufacturer>Chevy</Manufacturer>" + 
+                                                 "      <Model>Camaro</Model>" + 
+                                                 "    </Vehicle>" + 
+                                                 "    <Vehicle>" + 
+                                                 "      <Manufacturer>Pontiac</Manufacturer>" + 
+                                                 "      <Model>Firebird</Model>" + 
+                                                 "    </Vehicle>" + 
+                                                 "  </List>" + 
+                                                 "</Test>");
+
+            Assert.AreEqual("{\"Test\":{\"Vehicles\":[{\"Manufacturer\":\"Chevy\",\"Model\":\"Camaro\"},{\"Manufacturer\":\"Pontiac\",\"Model\":\"Firebird\"}]}}", xmlTest2.ToJSON().Replace(" ", "").Replace("\r", "").Replace("\n", ""));
+
+           XmlDocument xmlTest3 = XmlDoc.LoadXml("<Test> " +
+                                                 "  <List name=\"Models\">" + 
+                                                 "    <Model>Camaro</Model>" + 
+                                                 "    <Model>Malibu</Model>" + 
+                                                 "    <Model>Corvette</Model>" + 
+                                                 "  </List>" + 
+                                                 "</Test>");
+
+            Assert.AreEqual("{\"Test\":{\"Models\":[\"Camaro\",\"Malibu\",\"Corvette\"]}}", xmlTest3.ToJSON().Replace(" ", "").Replace("\r", "").Replace("\n", ""));
         }
     }
 }

@@ -54,7 +54,8 @@
     <SignAssembly>false</SignAssembly>
   </PropertyGroup>
   <PropertyGroup>
-    <AssemblyOriginatorKeyFile>Mondo.Web.pfx</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>
+    </AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release %28No Deploy%29|AnyCPU'">
     <OutputPath>bin\Release %28No Deploy%29\</OutputPath>
@@ -88,9 +89,6 @@
       <Project>{59B005F5-D308-494C-BDF2-5B32AC7AA92D}</Project>
       <Name>Mondo.Common</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Mondo.Web.pfx" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

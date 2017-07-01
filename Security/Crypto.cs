@@ -44,10 +44,10 @@ namespace Mondo.Security
 		{
             _key = key.DeepClone();
             _IV  = IV.DeepClone();
-      #if DEBUG
+          #if DEBUG
             _strIV = _IV.ToBase64String();
             _strKey = _key.ToBase64String();
-      #endif
+          #endif
 		}
 
 		/****************************************************************************/
@@ -58,10 +58,10 @@ namespace Mondo.Security
                 _key = aList[0].DeepClone();
                 _IV  = aList[1].DeepClone();
             }
-      #if DEBUG
+          #if DEBUG
             _strIV = _IV.ToBase64String();
             _strKey = _key.ToBase64String();
-      #endif
+          #endif
 		}
 
         #if DEBUG
@@ -71,7 +71,7 @@ namespace Mondo.Security
 		{
             get
             {
-                return(_key);
+                return _key;
             }
 		}
 
@@ -80,12 +80,12 @@ namespace Mondo.Security
      	/****************************************************************************/
         public static Crypto GenerateNew()
 		{
-            using(RijndaelManaged objAlgo = new RijndaelManaged())
+            using(RijndaelManaged algorithm = new RijndaelManaged())
             {
-                objAlgo.GenerateKey();
-                objAlgo.GenerateIV();
+                algorithm.GenerateKey();
+                algorithm.GenerateIV();
 
-                return(new Crypto(objAlgo.Key, objAlgo.IV));
+                return new Crypto(algorithm.Key, algorithm.IV);
             }
         }
 
@@ -104,7 +104,7 @@ namespace Mondo.Security
                 aList.Add(_key);
                 aList.Add(_IV);
 
-                return(aList.ToArray());
+                return aList.ToArray();
             }
         }
 
@@ -142,7 +142,7 @@ namespace Mondo.Security
         {
             using(RijndaelManaged crypto = new RijndaelManaged())
             {
-                return(GenerateKey(crypto));
+                return GenerateKey(crypto);
             }
         }
 
@@ -157,7 +157,7 @@ namespace Mondo.Security
             aParts[0] = Convert.ToBase64String(algorithm.Key);
             aParts[1] = Convert.ToBase64String(algorithm.IV);
 
-            return(aParts);
+            return aParts;
         }
 
         /****************************************************************************/
@@ -169,19 +169,19 @@ namespace Mondo.Security
                 crypto.GenerateIV();
 
                 aIV  = crypto.IV;
-                return(crypto.Key);
+                return crypto.Key;
             }
         }
 
         #endregion
 
         /****************************************************************************/
-        public static byte[] Encrypt(byte[] aData, byte[] aPassword, byte[] aSalt)
+        public static byte[] Encrypt(byte[] aData, byte[] aPassword, byte[] aSalt, int iterations = kPasswordHashIterations)
         {
             byte[] aKey = null;
             byte[] aIV  = null;
 
-            GenerateRC2Key(aPassword, aSalt, out aKey, out aIV);
+            GenerateRC2Key(aPassword, aSalt, iterations, out aKey, out aIV);
 
             using(RC2CryptoServiceProvider algorithm = new RC2CryptoServiceProvider())
             {
@@ -189,17 +189,17 @@ namespace Mondo.Security
                 algorithm.IV  = aIV;
 
                 // setup an RC2 object to encrypt with the derived key                              
-                return(EncryptBytes(algorithm, aData));
+                return EncryptBytes(algorithm, aData);
             }
         }
 
         /****************************************************************************/
-        public static string Encrypt(string strData, string password, byte[] aSalt)
+        public static string Encrypt(string strData, string password, byte[] aSalt, int iterations = kPasswordHashIterations)
         {
             byte[] aKey = null;
             byte[] aIV  = null;
 
-            GenerateRC2Key(password, aSalt, out aKey, out aIV);
+            GenerateRC2Key(password, aSalt, iterations, out aKey, out aIV);
 
             using(RC2CryptoServiceProvider algorithm = new RC2CryptoServiceProvider())
             {
@@ -207,14 +207,14 @@ namespace Mondo.Security
                 algorithm.IV  = aIV;
 
                 // setup an RC2 object to encrypt with the derived key                              
-                return(InternalEncrypt(algorithm, strData));
+                return InternalEncrypt(algorithm, strData);
             }
         }
 
         /****************************************************************************/
         private SymmetricAlgorithm CreateAlgorithm()
         {
-            return(new RijndaelManaged {Key = _key, IV = _IV});
+            return new RijndaelManaged {Key = _key, IV = _IV};
         }
 
         /****************************************************************************/
@@ -222,7 +222,7 @@ namespace Mondo.Security
         {
             using(SymmetricAlgorithm algorithm = CreateAlgorithm())
             {
-                return(InternalEncrypt(algorithm, strData));
+                return InternalEncrypt(algorithm, strData);
             }
         }
 
@@ -231,35 +231,35 @@ namespace Mondo.Security
         {
             using(SymmetricAlgorithm algorithm = CreateAlgorithm())
             {
-                return(EncryptBytes(algorithm, aData));
+                return EncryptBytes(algorithm, aData);
             }
         }
 
         /****************************************************************************/
-        public static string Decrypt(string strData, string password, byte[] aSalt)
+        public static string Decrypt(string strData, string password, byte[] aSalt, int iterations = kPasswordHashIterations)
         {
             byte[] aKey = null;
             byte[] aIV  = null;
 
-            GenerateRC2Key(password, aSalt, out aKey, out aIV);
+            GenerateRC2Key(password, aSalt, iterations, out aKey, out aIV);
 
             using(RC2CryptoServiceProvider algorithm = new RC2CryptoServiceProvider {Key = aKey, IV = aIV})
             {
-                return(InternalDecrypt(algorithm, strData));
+                return InternalDecrypt(algorithm, strData);
             }
         }
 
         /****************************************************************************/
-        public static byte[] Decrypt(byte[] aData, byte[] aPassword, byte[] aSalt)
+        public static byte[] Decrypt(byte[] aData, byte[] aPassword, byte[] aSalt, int iterations = kPasswordHashIterations)
         {
             byte[] aKey = null;
             byte[] aIV  = null;
 
-            GenerateRC2Key(aPassword, aSalt, out aKey, out aIV);
+            GenerateRC2Key(aPassword, aSalt, iterations, out aKey, out aIV);
 
             using(RC2CryptoServiceProvider algorithm = new RC2CryptoServiceProvider {Key = aKey, IV = aIV})
             {
-                return(DecryptBytes(algorithm, aData));
+                return DecryptBytes(algorithm, aData);
             }
         }
 
@@ -268,7 +268,7 @@ namespace Mondo.Security
         {
             using(SymmetricAlgorithm algorithm = CreateAlgorithm())
             {
-                return(DecryptBytes(algorithm, aEncrypted, offset, length));
+                return DecryptBytes(algorithm, aEncrypted, offset, length);
             }
         }
 
@@ -277,66 +277,67 @@ namespace Mondo.Security
         {
             using(SymmetricAlgorithm algorithm = CreateAlgorithm())
             {
-                return(InternalDecrypt(algorithm, encrypted));
+                return InternalDecrypt(algorithm, encrypted);
             }
         }
 
         /****************************************************************************/
         public byte[] DecryptBytes(byte[] aData)
         {
-            return(Decrypt(aData));
+            return Decrypt(aData);
         }
 
         #region Password and Salt
 
         private const int kPasswordHashIterations = 5000;
+        private const int kPasswordHashMaxBytes   = 128;
 
         /****************************************************************************/
         public static string Hash(string password, byte[] aSalt, int nIterations = kPasswordHashIterations)
         {
             byte[] aHashBytes = HashBytes(password, aSalt, nIterations);
 
-            return(Convert.ToBase64String(aHashBytes));
+            return Convert.ToBase64String(aHashBytes);
         }       
 
         /****************************************************************************/
-        public static byte[] HashBytes(string password, byte[] aSalt, int nIterations = kPasswordHashIterations)
+        public static byte[] HashBytes(string password, byte[] aSalt, int nIterations = kPasswordHashIterations, int maxBytes = kPasswordHashMaxBytes)
         {
             if(nIterations == 0)
                 nIterations = kPasswordHashIterations;
 
-            using(Rfc2898DeriveBytes objHasher = new Rfc2898DeriveBytes(password, aSalt, nIterations))
+            using(Rfc2898DeriveBytes hasher = new Rfc2898DeriveBytes(password, aSalt, nIterations))
             {
-                return objHasher.GetBytes(128);
+                return hasher.GetBytes(maxBytes);
             }
         }       
 
         /****************************************************************************/
-        public static char[] Hash(byte[] aPassword, byte[] aSalt, int nIterations = kPasswordHashIterations)
+        public static char[] Hash(byte[] aPassword, byte[] aSalt, int nIterations = kPasswordHashIterations, int maxBytes = kPasswordHashMaxBytes)
         {
-            using(Rfc2898DeriveBytes objHasher = new Rfc2898DeriveBytes(aPassword, aSalt, nIterations))
+            using(Rfc2898DeriveBytes hasher = new Rfc2898DeriveBytes(aPassword, aSalt, nIterations))
             {
-                byte[] aHashBytes = objHasher.GetBytes(128);
+                byte[] aHashBytes = hasher.GetBytes(maxBytes);
                 char[] outArray   = new char[aHashBytes.Length];
 
                 Convert.ToBase64CharArray(aHashBytes, 0, aHashBytes.Length, outArray, 0);
 
                 aHashBytes.Clear();
 
-                return(outArray);
+                return outArray;
             }
         }       
 
         /****************************************************************************/
         public static string GenerateNewPassword(int size)
         {
-            return(GenerateSaltString(size).Replace("=", ""));
+            return GenerateSaltString(size).Replace("=", "");
         }
 
         /****************************************************************************/
         public static string GenerateSaltString(int size)
         {
-            return(Convert.ToBase64String(GenerateSalt(size)));
+            return Convert.ToBase64String(GenerateSalt(size));
         }
 
         /****************************************************************************/
@@ -348,7 +349,7 @@ namespace Mondo.Security
 
                 objCrypto.GetBytes(aBuffer);
 
-                return(aBuffer);
+                return aBuffer;
             }
         }
 
@@ -372,7 +373,7 @@ namespace Mondo.Security
                         csEncrypt.FlushFinalBlock();
 
                         // Get encrypted array of bytes.
-                        return(msEncrypt.ToArray());
+                        return msEncrypt.ToArray();
                     }
                 }
             }
@@ -382,7 +383,7 @@ namespace Mondo.Security
         private static string InternalEncrypt(SymmetricAlgorithm algorithm, string data)
         {
             if(string.IsNullOrEmpty(data))
-                return("");
+                return "";
 
             // Get encrypted array of bytes.
             byte[] toEncrypt = Encoding.UTF8.GetBytes(data); 
@@ -392,7 +393,7 @@ namespace Mondo.Security
 
             toEncrypt.Clear();
 
-            return(strReturn);
+            return strReturn;
         }        
                
         /****************************************************************************/
@@ -415,7 +416,7 @@ namespace Mondo.Security
                     Marshal.ZeroFreeBSTR(pData);
                 }
 
-               return(EncryptBytes(algorithm, aData));
+               return EncryptBytes(algorithm, aData);
             }
             finally
             {
@@ -431,7 +432,7 @@ namespace Mondo.Security
         private static string InternalDecrypt(SymmetricAlgorithm algorithm, string encrypted)
         {
             if(string.IsNullOrEmpty(encrypted))
-                return("");
+                return "";
 
             byte[] aEncrypted = Convert.FromBase64String(encrypted);
             byte[] aDecrypted = DecryptBytes(algorithm, aEncrypted);
@@ -442,7 +443,7 @@ namespace Mondo.Security
             while(strResult[strResult.Length-1] == '\0')
                 strResult = strResult.Substring(0, strResult.Length-1);
 
-            return(strResult);
+            return strResult;
         }
 
         /****************************************************************************/
@@ -450,7 +451,7 @@ namespace Mondo.Security
         {
             byte[] aEncrypted = Convert.FromBase64String(encrypted);
 
-            return(DecryptBytes(algorithm, aEncrypted));
+            return DecryptBytes(algorithm, aEncrypted);
         }
 
         /****************************************************************************/
@@ -468,16 +469,16 @@ namespace Mondo.Security
                         // Read the data out of the crypto stream.
                         int iRead = csDecrypt.Read(fromEncrypt, 0, fromEncrypt.Length);
 
-                        return(fromEncrypt.DeepClone(0, iRead));
+                        return fromEncrypt.DeepClone(0, iRead);
                     }
                 }
             }
         }
 
         /****************************************************************************/
-        private static void GenerateRC2Key(string password, byte[] aSalt, out byte[] aKey, out byte[] aIV)
+        private static void GenerateRC2Key(string password, byte[] aSalt, int iterations, out byte[] aKey, out byte[] aIV)
         {
-            using(Rfc2898DeriveBytes pwdGen = new Rfc2898DeriveBytes(password, aSalt, 5000))
+            using(Rfc2898DeriveBytes pwdGen = new Rfc2898DeriveBytes(password, aSalt, iterations))
             {
                 aKey = pwdGen.GetBytes(16);
                 aIV  = pwdGen.GetBytes(8);
@@ -485,9 +486,9 @@ namespace Mondo.Security
         }
 
         /****************************************************************************/
-        private static void GenerateRC2Key(byte[] aPassword, byte[] aSalt, out byte[] aKey, out byte[] aIV)
+        private static void GenerateRC2Key(byte[] aPassword, byte[] aSalt, int iterations, out byte[] aKey, out byte[] aIV)
         {
-            using(Rfc2898DeriveBytes pwdGen = new Rfc2898DeriveBytes(aPassword, aSalt, 5000))
+            using(Rfc2898DeriveBytes pwdGen = new Rfc2898DeriveBytes(aPassword, aSalt, iterations))
             {
                 aKey = pwdGen.GetBytes(16);
                 aIV  = pwdGen.GetBytes(8);

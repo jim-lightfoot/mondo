@@ -130,11 +130,37 @@ namespace Mondo.Common
     /****************************************************************************/
     public static class UtilityExtensions
     {
+        private static DateTime _daydexBase = new DateTime(1900, 1, 1);
+
         /****************************************************************************/
         public static int Age(this DateTime dtBirth, DateTime dtCurrent)
         {
             return((int)Math.Floor((dtCurrent - dtBirth).TotalHours / (double)8766));
         }        
+
+        /*****************************************************************************/
+        public static int Daydex(this DateTime dtValue)
+        {
+            if(dtValue == DateTime.MinValue)
+                return(0);
+
+            if(dtValue == DateTime.MaxValue)
+                return(int.MaxValue);
+
+            return((dtValue.Date - _daydexBase).Days);
+        }
+
+        /*****************************************************************************/
+        public static DateTime FromDaydex(this int value)
+        {
+            if(value <= 0)
+                return DateTime.MinValue;
+
+            if(value == int.MaxValue)
+                return DateTime.MaxValue;
+
+            return _daydexBase.AddDays(value);
+        }
 
         /****************************************************************************/
         public static string ToShortString(this bool bValue)
@@ -833,37 +859,34 @@ namespace Mondo.Common
             {
             }
 
-            return (DateTime.MinValue);
+            return DateTime.MinValue;
         }
-
-        private static DateTime s_DaydexBase = new DateTime(1900, 1, 1);
 
         /*****************************************************************************/
         public static int ToDaydex(object objValue)
         {
-            DateTime dtValue = Utility.ToDateTime(objValue);
-
-            if(dtValue == DateTime.MinValue)
-                return(0);
-
-            return((dtValue.Date - s_DaydexBase).Days);
+            try
+            {
+                return Utility.ToDateTime(objValue).Daydex();
+            }
+            catch
+            { 
+                return 0;
+            }
         }
 
         /*****************************************************************************/
-        public static DateTime FromDaydex(object objValue)
+        public static DateTime FromDaydex(object value)
         {
             try
             {
-                int iDaydex = Utility.ToInt(objValue, 0);
+                int daydex = Utility.ToInt(value, 0);
 
-                if(iDaydex == 0)
-                    return(s_DaydexBase);
-
-                return(s_DaydexBase.AddDays(iDaydex));
+                return daydex.FromDaydex();
             }
             catch
             {
-                return(s_DaydexBase);
+                return DateTime.MinValue;
             }
         }
 

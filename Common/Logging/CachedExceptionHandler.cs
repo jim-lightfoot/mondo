@@ -1,18 +1,18 @@
 /****************************************************************************/
 /*                                                                          */
-/*    The Mondo Libraries  							                        */
+/*    The Mondo Libraries  						    */
 /*                                                                          */
-/*        Namespace: Mondo.Common							                */
-/*             File: CachedExceptionHandler.cs							    */
+/*        Namespace: Mondo.Common					    */
+/*             File: CachedExceptionHandler.cs				    */
 /*        Class(es): CachedExceptionHandler                                 */
 /*          Purpose: Caches exceptions and coalesces duplicate messages to  */
 /*                      be sent at certain intervals so as not to flood     */
-/*                      email systems.                                      */
+/*                      loggin systems.                                     */
 /*                                                                          */
 /*  Original Author: Jim Lightfoot                                          */
 /*    Creation Date: 24 Aug 2008                                            */
 /*                                                                          */
-/*   Copyright (c) 2008 - Jim Lightfoot, All rights reserved                */
+/*   Copyright (c) 2008-2017 - Jim Lightfoot, All rights reserved           */
 /*                                                                          */
 /*  Licensed under the MIT license:                                         */
 /*    http://www.opensource.org/licenses/mit-license.php                    */
@@ -55,12 +55,12 @@ namespace Mondo.Common
     /*********************************************************************/
     internal class ExceptionCache 
     {
-        private readonly Dictionary<string, Error> m_aExceptions = new Dictionary<string,Error>(137);
+        private readonly Dictionary<string, Error> _aExceptions = new Dictionary<string,Error>(137);
         
         private const int kExpiration = 60;  // Expires cached error after "n" minutes
         private const int kSendNotice = 5;   // Sends error message every "n" minutes
 
-        private readonly object m_objLock = new System.Object();
+        private readonly object _objLock = new System.Object();
         
         /*********************************************************************/
         internal ExceptionCache()
@@ -70,22 +70,19 @@ namespace Mondo.Common
         /*********************************************************************/
         internal bool Add(ref Exception objException)
         {
-          #if xDEBUG
-            return(true);
-          #else
             string strKey = ToHash(objException);
 
-            lock(m_objLock)
+            lock(_objLock)
             {
-                if(m_aExceptions.ContainsKey(strKey))
+                if(_aExceptions.ContainsKey(strKey))
                 {
-                    Error    objError = m_aExceptions[strKey];
+                    Error    objError = _aExceptions[strKey];
                     DateTime dtNow    = DateTime.Now;
                     
                     // If the cached error is more than 1 hour old then remove it and start over
                     if(objError.Created < dtNow.AddMinutes(-kExpiration))
                     {
-                        m_aExceptions.Remove(strKey);
+                        _aExceptions.Remove(strKey);
                     }
                     // If it's been more than 5 minutes since we last sent the error then send it again
                     else if(objError.LastSent < dtNow.AddMinutes(-kSendNotice))                  
@@ -110,9 +107,8 @@ namespace Mondo.Common
 
                 Error objNewError = new Error(objException);
                 
-                m_aExceptions.Add(strKey, objNewError);
+                _aExceptions.Add(strKey, objNewError);
             }
-          #endif
 
             return(true);
         }
@@ -140,53 +136,53 @@ namespace Mondo.Common
         /*********************************************************************/
         private class Error
         {
-            private Exception m_objException;
-            private int       m_iCount = 1;
-            private DateTime  m_dtCreated;
-            private DateTime  m_dtLastSent;
+            private Exception _objException;
+            private int       _iCount = 1;
+            private DateTime  _dtCreated;
+            private DateTime  _dtLastSent;
 
             /*********************************************************************/
             internal Error(Exception ex)
             {
-                m_objException = ex;
-                m_dtCreated    = m_dtLastSent = DateTime.Now;
+                _objException = ex;
+                _dtCreated    = _dtLastSent = DateTime.Now;
             }
             
             /*********************************************************************/
             internal Exception Exception
             {
-              get {return(m_objException);}
+              get {return(_objException);}
             }
             
             /*********************************************************************/
             internal DateTime Created
             {
-                get {return(m_dtCreated);}
+                get {return(_dtCreated);}
             }
             
             /*********************************************************************/
             internal int Count
             {
-                get {return(m_iCount);}
+                get {return(_iCount);}
             }
             
             /*********************************************************************/
             internal DateTime LastSent
             {
-                set {m_dtLastSent = value;}
-                get {return(m_dtLastSent);}
+                set {_dtLastSent = value;}
+                get {return(_dtLastSent);}
             }
             
             /*********************************************************************/
             internal void IncrementCount()
             {
-                ++m_iCount;
+                ++_iCount;
             }
             
             /*********************************************************************/
             internal void ResetCount()
             {
-                m_iCount = 0;
+                _iCount = 0;
             }
         }       
     }

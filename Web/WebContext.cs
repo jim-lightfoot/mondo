@@ -1,10 +1,10 @@
 ﻿/****************************************************************************/
 /*                                                                          */
-/*    The Mondo Libraries  	                                                */
+/*    The Mondo Libraries  	                                            */
 /*                                                                          */
-/*        Namespace: Mondo.Web							                    */
-/*             File: WebContext.cs											*/
-/*        Class(es): WebContext 							                */
+/*        Namespace: Mondo.Web						    */
+/*             File: WebContext.cs					    */
+/*        Class(es): WebContext 					    */
 /*          Purpose: Provide an Http request context  	                    */
 /*                                                                          */
 /*  Original Author: Jim Lightfoot                                          */
@@ -66,7 +66,7 @@ namespace Mondo.Web
             if(string.IsNullOrWhiteSpace(path))
               path = "";
 
-            return(WebUtil.MapPath(path));
+            return WebUtil.MapPath(path);
         }
 
         /****************************************************************************/
@@ -130,7 +130,7 @@ namespace Mondo.Web
         /****************************************************************************/
         public void AddSetting(string name, object value, int expires = 1, bool httpOnly = true, bool secure = true, string domain = "")
         {
-            WebUtil.BrowserSession.AddSetting(name, value, domain);        
+            WebUtil.Cookie.Add(name, value.ToString(), expires, httpOnly, secure, domain);        
         }
 
         /****************************************************************************/
@@ -154,7 +154,7 @@ namespace Mondo.Web
         /****************************************************************************/
         public void AddSetting(string name, object value, int expires = 1, bool httpOnly = true, bool secure = true, string domain = "")
         {
-            WebUtil.PageRequest.AddSetting(name, value.ToString());        
+            WebUtil.PageRequest.AddSetting(name, value);        
         }
 
         /****************************************************************************/

@@ -1,16 +1,16 @@
 ﻿/****************************************************************************/
 /*                                                                          */
-/*    The Mondo Libraries  							                        */
+/*    The Mondo Libraries  						    */
 /*                                                                          */
-/*        Namespace: Mondo.Common							                */
-/*             File: ExceptionEmail.cs								        */
-/*        Class(es): ExceptionEmail									        */
+/*        Namespace: Mondo.Common					    */
+/*             File: ExceptionEmail.cs					    */
+/*        Class(es): ExceptionEmail					    */
 /*          Purpose: Send an exception email                                */
 /*                                                                          */
 /*  Original Author: Jim Lightfoot                                          */
 /*    Creation Date: 24 Aug 2008                                            */
 /*                                                                          */
-/*   Copyright (c) 2008 - Jim Lightfoot, All rights reserved                */
+/*   Copyright (c) 2008-2017 - Jim Lightfoot, All rights reserved           */
 /*                                                                          */
 /*  Licensed under the MIT license:                                         */
 /*    http://www.opensource.org/licenses/mit-license.php                    */
@@ -64,14 +64,14 @@ namespace Mondo.Common
     /****************************************************************************/
     public abstract class TransformLog  
     {
-        private XslCompiledTransform m_objTransform = null;
+        private XslCompiledTransform _objTransform = null;
 
         /****************************************************************************/
         protected TransformLog(string strTransformName) 
         {
             string strXslt = XsltResource.GetString("ExceptionFormatters." + strTransformName + ".xslt");
 
-            m_objTransform = Transform.FromString(strXslt);
+            _objTransform = Transform.FromString(strXslt);
         }
 
         /****************************************************************************/
@@ -83,7 +83,7 @@ namespace Mondo.Common
 
                 aArgs.AddParam("APPNAME", "", strAppName);
 
-                return(Transform.Run(m_objTransform, xmlMessage, aArgs));
+                return(Transform.Run(_objTransform, xmlMessage, aArgs));
             }
             catch(Exception ex)
             {
@@ -97,9 +97,9 @@ namespace Mondo.Common
     /****************************************************************************/
     public class EmailLog : TransformLog, ILog
     {
-        private   string m_strAppName;
-        protected string m_strFrom;
-        protected string m_strTo;
+        private   string _strAppName;
+        protected string _strFrom;
+        protected string _strTo;
         protected bool   IsHtml {get; set;}
 
          /****************************************************************************/
@@ -108,9 +108,9 @@ namespace Mondo.Common
             if(config == null)
                 config = new AppConfig();
 
-            m_strAppName = config.Get("ExceptionEmailAppName");
-            m_strFrom    = config.Get("ExceptionEmailFrom");
-            m_strTo      = config.Get("ExceptionEmailTo");
+            _strAppName = config.Get("ExceptionEmailAppName");
+            _strFrom    = config.Get("ExceptionEmailFrom");
+            _strTo      = config.Get("ExceptionEmailTo");
             IsHtml       = true;
        }
 
@@ -126,9 +126,9 @@ namespace Mondo.Common
             {
                 using(Email objEmail = new Email())
                 {
-                    objEmail.From       = m_strFrom;
-                    objEmail.To         = m_strTo;
-                    objEmail.Subject    = "An exception was thrown by " + m_strAppName;
+                    objEmail.From       = _strFrom;
+                    objEmail.To         = _strTo;
+                    objEmail.Subject    = "An exception was thrown by " + _strAppName;
                     objEmail.Body       = strMessage.Trim();
                     objEmail.IsBodyHtml = IsHtml;
 
@@ -145,7 +145,7 @@ namespace Mondo.Common
         public void WriteError(Exception ex, Dictionary<string, string> properties)
         {
             XmlDocument xmlMessage = ex.ToXml();
-            string      strMessage = FormatMessage(xmlMessage, m_strAppName);
+            string      strMessage = FormatMessage(xmlMessage, _strAppName);
 
             SendMessage(strMessage);
         }

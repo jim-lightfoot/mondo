@@ -74,7 +74,7 @@ namespace Mondo.Globalization
 
                     using(objWriter.Acquire)
                     {
-                        using(new XmlElementWriter(objWriter, "Zoomla"))
+                        using(new XmlElementWriter(objWriter, "Globalization"))
                         {
                             using(new XmlElementWriter(objWriter, "TimeZones"))
                             {

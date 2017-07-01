@@ -45,7 +45,7 @@ namespace Mondo.Xml.Xsl
             XslCompiledTransform transform = null;
 
            #if DEBUG
-            transform = new XslCompiledTransform(false);
+            transform = new XslCompiledTransform(true);
           #else
             transform = new XslCompiledTransform();
           #endif

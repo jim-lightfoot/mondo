@@ -1,9 +1,9 @@
 ﻿/****************************************************************************/
 /*                                                                          */
-/*    The Mondo Libraries  							                        */
+/*    The Mondo Libraries  						    */
 /*                                                                          */
-/*        Namespace: Mondo.Common							                */
-/*             File: Log.cs								                    */
+/*        Namespace: Mondo.Common					    */
+/*             File: Log.cs						    */
 /*        Class(es): Log, ILog, ApplicationLog                              */
 /*          Purpose: Log errors and other info                              */
 /*                                                                          */

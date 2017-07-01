@@ -179,6 +179,21 @@ namespace Mondo.Xml
         }
 
         /****************************************************************************/
+        public static void PrependToRoot(this XmlDocument xmlDoc, string xmlChild)
+        {
+            if(xmlDoc.DocumentElement.ChildNodes.Count == 0)
+                xmlDoc.DocumentElement.AppendNode(xmlChild);
+            else
+            {
+                XmlDocumentFragment xmlFragment = xmlDoc.CreateDocumentFragment();
+
+                xmlFragment.InnerXml = xmlChild;
+
+                xmlDoc.DocumentElement.InsertBefore(xmlFragment, xmlDoc.DocumentElement.ChildNodes[0]);
+            }
+        }
+
+        /****************************************************************************/
         public static void ForEachNode(this XmlNode xmlNode, string strChild, Action<XmlNode> action)
         {
             XmlNodeList xmlChildren = xmlNode.SelectNodes(strChild);
@@ -252,7 +267,132 @@ namespace Mondo.Xml
             return((XmlElement)xmlChild);
         }
 
+
+        /****************************************************************************/
+        public static string ToJSON(this XmlDocument xmlDoc)
+        {
+            StringBuilder sb = new StringBuilder();
+
+            sb.AppendLine("{");
+            RenderNode(sb, XmlDoc.RootElement(xmlDoc), 2);
+            sb.AppendLine("}");
+
+            return sb.ToString();
+        }
+
         #region Private Methods
+
+
+        /****************************************************************************/
+        private static void RenderNode(StringBuilder sb, XmlNode xmlNode, int iIndent)
+        {
+            if(xmlNode.LocalName == "List")
+            {
+                RenderList(sb, xmlNode, iIndent);
+                return;
+            }
+
+            XmlNodeList aChildren = xmlNode.SelectNodes("*");
+            string      strIndent = "".PadLeft(iIndent, ' ');
+
+            if(aChildren.Count != 0)
+            {
+                sb.Append(strIndent, "\"", xmlNode.LocalName, "\":", "\r\n");
+                sb.AppendLine(strIndent + "{");
+
+                RenderChildren(sb, aChildren, iIndent);
+
+                sb.AppendLine(strIndent + "}");
+            }
+            else
+            {
+                var value = EncodeText(xmlNode);
+
+                sb.Append(strIndent, "\"", xmlNode.LocalName, "\": ", value);
+            }
+        }
+
+        /****************************************************************************/
+        private static string EncodeText(XmlNode xmlNode)
+        {       
+            string value  = xmlNode.InnerText.Trim();
+            double dValue = 0d;
+            string type   = xmlNode.GetAttribute("type", "");
+
+            if(value == "true" || value == "false")
+                return value;
+
+            if(type != "string" && double.TryParse(value, out dValue))
+                return value;
+
+            return "\"" + value.Replace("\"", "\\\"").Replace("\r", "\\r").Replace("\n", "\\n") + "\"";
+        }
+
+        /****************************************************************************/
+        private static void RenderChildren(StringBuilder sb, XmlNodeList aChildren, int iIndent)
+        {
+            int nItems = aChildren.Count;
+
+            for(int i = 0; i < nItems; ++i)
+            {
+                XmlNode xmlChild = aChildren[i];
+
+                RenderNode(sb, xmlChild, iIndent+2);
+
+                if(i < (nItems-1))
+                    sb.AppendLine(",");
+                else
+                    sb.AppendLine("");
+            }
+        }
+
+        /****************************************************************************/
+        private static void RenderList(StringBuilder sb, XmlNode xmlNode, int iIndent)
+        {
+            XmlNodeList aChildren = xmlNode.SelectNodes("*");
+            string      strIndent = "".PadLeft(iIndent, ' ');
+
+            sb.Append(strIndent, "\"", xmlNode.GetAttribute("name"), "\":", "\r\n");
+            sb.AppendLine(strIndent + "[");
+
+            int nItems = aChildren.Count;
+
+            if(nItems > 0)
+            {            
+                var childNodes = aChildren[0].SelectNodes("*");
+
+                // If first node has no child nodes then this is an array of strings
+                if(childNodes.Count == 0)
+                {
+                    var list = new StringList();    
+                    
+                    foreach(XmlNode xmlChild in aChildren)
+                        list.Add(EncodeText(xmlChild));
+
+                    sb.AppendLine(list.Pack(","));
+                }
+                else
+                {
+                    string strIndent2 = "".PadLeft(iIndent+2, ' ');
+
+                    for(int i = 0; i < nItems; ++i)
+                    {
+                        var xmlChild = aChildren[i];
+
+                        sb.AppendLine(strIndent2 + "{");
+
+                        RenderChildren(sb, xmlChild.SelectNodes("*"), iIndent+2);
+
+                        if(i < (nItems-1))
+                            sb.AppendLine(strIndent2 + "},");
+                        else
+                            sb.AppendLine(strIndent2 + "}");
+                    }
+                }
+            }
+
+            sb.Append(strIndent + "]");
+        }
 
         /****************************************************************************/
         private static XmlNode EnsureNodePathExists(XmlNode xmlNode, string strNodeName)
