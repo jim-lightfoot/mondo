@@ -17,49 +17,50 @@
 /*                                                                          */
 /****************************************************************************/
 
+using Mondo.Common;
+using Mondo.Xml;
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Xml;
-using System.Xml.XPath;
-using System.Security;
 using System.Data;
 using System.Data.Common;
 using System.Data.SqlClient;
-using System.Data.SqlTypes;
 using System.IO;
+using System.Security;
 using System.Text;
 using System.Threading.Tasks;
-
-using Mondo.Common;
-using Mondo.Xml;
+using System.Xml;
+using System.Xml.XPath;
 
 namespace Mondo.Database
 {
     /****************************************************************************/
     /****************************************************************************/
     /// <summary>
-	/// A connection string for a database
-	/// </summary>
-	public class ConnectionString
+    /// A connection string for a database
+    /// </summary>
+    public class ConnectionString
     {
-        private string m_connectionString;
-        private string m_type = "";
+        private string _connectionString;
+        private string _type = "";
 
         /****************************************************************************/
+
         public ConnectionString(string connectionString, string type)
         {
-            m_connectionString = connectionString;
-            m_type = type;
+            _connectionString = connectionString;
+            _type = type;
         }
 
         /****************************************************************************/
+
         public ConnectionString(string connectionString)
         {
-            m_connectionString = connectionString;
+            _connectionString = connectionString;
         }
 
         /****************************************************************************/
+
         public static string Format(IConfig config, string connectionString, bool bLookup)
         {
             if (connectionString.Normalized() == "")
@@ -75,6 +76,7 @@ namespace Mondo.Database
         }
 
         /****************************************************************************/
+
         public static string Normalize(string connectionString)
         {
             connectionString = connectionString.Replace("mondo=oledb", "");
@@ -84,47 +86,50 @@ namespace Mondo.Database
             if (connectionString.StartsWith(";"))
                 connectionString = connectionString.Substring(1);
 
-            return (connectionString);
+            return connectionString;
         }
 
         /*************************************************************************/
+
         /// <summary>
         /// Lookup the actual connection string in the web.config
         /// </summary>
         /// <param name="connectionStringParam"></param>
         public static string Lookup(IConfig config, string connectionStringParam)
         {
-            return (config.GetConnectionString(connectionStringParam));
+            return config.GetConnectionString(connectionStringParam);
         }
 
         /****************************************************************************/
+
         public string Type
         {
-            get { return (m_type); }
+            get { return (_type); }
         }
 
         /****************************************************************************/
+
         public override string ToString()
         {
-            return (m_connectionString);
+            return _connectionString;
         }
     }
 
     /****************************************************************************/
     /****************************************************************************/
     /// <summary>
-	/// A connection to a database
-	/// </summary>
-	public abstract class Database : Openable
+    /// A connection to a database
+    /// </summary>
+    public abstract class Database : Openable
     {
-        protected        string             _connectionString = "";
-        private          DbConnection       _connection       = null;
-        private          DbTransaction      _transaction      = null;
-        private readonly DbProviderFactory  _factory;
-        private readonly RetryPolicy        _retryPolicy      = new DatabaseRetryPolicy();
+        protected        string            _connectionString = "";
+        private          DbConnection      _connection       = null;
+        private          DbTransaction     _transaction      = null;
+        private readonly DbProviderFactory _factory;
+        private readonly RetryPolicy       _retryPolicy      = new DatabaseRetryPolicy();
 
         private static string[] _aOLEDBProviders = new string[] { "msdaora", "oledb", "sqlncl", "mysqlprov" };
-        private static string[] _aODBCProviders = new string[] { "odbc", "sql server native client", "sql native client", "driver={mysql}", "orahome92" };
+        private static string[] _aODBCProviders  = new string[] { "odbc", "sql server native client", "sql native client", "driver={mysql}", "orahome92" };
 
         /*************************************************************************/
         /// <summary>
@@ -157,19 +162,19 @@ namespace Mondo.Database
         /*************************************************************************/
         public RetryPolicy RetryPolicy
         {
-            get { return (_retryPolicy); }
+            get { return _retryPolicy; }
         }
 
         /*************************************************************************/
         public static Database Create(IConfig config = null)
         {
-            return (Create("", true, config));
+            return Create("", true, config);
         }
 
         /*************************************************************************/
         public static Database Create(string connectionString, IConfig config = null)
         {
-            return (Create(connectionString, false, config));
+            return Create(connectionString, false, config);
         }
 
         /*************************************************************************/
@@ -181,12 +186,12 @@ namespace Mondo.Database
             connectionString = ConnectionString.Format(config, connectionString, bLookup);
 
             if (IsIn(connectionString, _aOLEDBProviders))
-                return (new OleDbDatabase(config, connectionString, false));
+                return new OleDbDatabase(config, connectionString, false);
 
             if (IsIn(connectionString, _aODBCProviders))
                 return (new OdbcDatabase(config, connectionString, false));
 
-            return (new SqlDatabase(config, connectionString, false));
+            return new SqlDatabase(config, connectionString, false);
         }
 
         /****************************************************************************/
@@ -272,17 +277,18 @@ namespace Mondo.Database
         {
             get
             {
-                return (_connection);
+                return _connection;
             }
         }
 
         /*************************************************************************/
         public DbTransaction Transaction
         {
-            get { return (_transaction); }
+            get { return _transaction; }
         }
 
         /*************************************************************************/
+
         public void BeginTransaction()
         {
             _transaction = _connection.BeginTransaction();
@@ -325,40 +331,41 @@ namespace Mondo.Database
         /****************************************************************************/
         public DbCommand MakeSelectCommand(string strSelect)
         {
-            DbCommand objCommand = MakeCommand();
+            DbCommand command = MakeCommand();
 
-            objCommand.CommandText = strSelect;
-            objCommand.CommandType = CommandType.Text;
+            command.CommandText = strSelect;
+            command.CommandType = CommandType.Text;
 
-            return (objCommand);
+            return command;
         }
 
         /****************************************************************************/
         public DbCommand MakeCommand(StoredProc sp)
         {
-            DbCommand objCommand = MakeCommand();
+            DbCommand command = MakeCommand();
 
-            objCommand.CommandText = sp.Name;
-            objCommand.CommandType = CommandType.StoredProcedure;
-            objCommand.CommandTimeout = this.CommandTimeout;
+            command.CommandText = sp.Name;
+            command.CommandType = CommandType.StoredProcedure;
+            command.CommandTimeout = this.CommandTimeout;
 
-            return (objCommand);
+            return command;
         }
 
         /****************************************************************************/
         public DbCommand MakeCommand()
         {
-            DbCommand objCommand = _factory.CreateCommand();
+            DbCommand command = _factory.CreateCommand();
 
             if (_transaction != null)
-                objCommand.Transaction = _transaction;
+                command.Transaction = _transaction;
 
-            return (objCommand);
+            return command;
         }
 
         #region CreateParameter
 
         /****************************************************************************/
+
         public DbParameter CreateParameter(string parameterName,
                                            DbType dbType,
                                            int size,
@@ -370,52 +377,54 @@ namespace Mondo.Database
                                            DataRowVersion sourceVersion,
                                            object value)
         {
-            DbParameter objParameter = _factory.CreateParameter();
+            DbParameter parameter = _factory.CreateParameter();
 
-            objParameter.ParameterName = parameterName;
-            objParameter.DbType = dbType;
-            objParameter.Direction = direction;
-            objParameter.SourceColumnNullMapping = isNullable;
-            objParameter.SourceColumn = sourceColumn;
-            objParameter.SourceVersion = sourceVersion;
-            objParameter.Value = value;
+            parameter.ParameterName = parameterName;
+            parameter.DbType = dbType;
+            parameter.Direction = direction;
+            parameter.SourceColumnNullMapping = isNullable;
+            parameter.SourceColumn = sourceColumn;
+            parameter.SourceVersion = sourceVersion;
+            parameter.Value = value;
 
             if (size > 0)
-                objParameter.Size = size;
+                parameter.Size = size;
 
-            return (objParameter);
+            return parameter;
         }
 
         /****************************************************************************/
+
         public DbParameter CreateParameter(string parameterName,
                                            DbType dbType)
         {
-            DbParameter objParameter = _factory.CreateParameter();
+            DbParameter parameter = _factory.CreateParameter();
 
-            objParameter.ParameterName = parameterName;
-            objParameter.DbType = dbType;
-            objParameter.Direction = ParameterDirection.Input;
-            objParameter.SourceColumnNullMapping = true;
-            objParameter.SourceVersion = DataRowVersion.Default;
+            parameter.ParameterName = parameterName;
+            parameter.DbType = dbType;
+            parameter.Direction = ParameterDirection.Input;
+            parameter.SourceColumnNullMapping = true;
+            parameter.SourceVersion = DataRowVersion.Default;
 
-            return (objParameter);
+            return parameter;
         }
 
         /****************************************************************************/
+
         public DbParameter CreateParameter(string parameterName,
                                            object data)
         {
-            DbParameter objParameter = _factory.CreateParameter();
+            DbParameter parameter = _factory.CreateParameter();
 
-            objParameter.ParameterName = parameterName;
-            objParameter.Value = data;
+            parameter.ParameterName = parameterName;
+            parameter.Value = data;
 
-            return (objParameter);
+            return parameter;
         }
 
-        #endregion
+        #endregion 
 
-        #region ExecuteSelect 
+        #region ExecuteSelect
 
         /****************************************************************************/
         public DbDataReader ExecuteSelect(string strSelect, CommandBehavior eBehavior = CommandBehavior.Default)
@@ -451,23 +460,23 @@ namespace Mondo.Database
             });
         }
 
-        #endregion
+        #endregion 
 
-        #region ExecuteDataSet 
+        #region ExecuteDataSet
 
         /****************************************************************************/
         public DataSet ExecuteDataSet(string strSelect)
         {
             using (DbCommand cmd = MakeSelectCommand(strSelect))
             {
-                return (ExecuteDataSet(cmd));
+                return ExecuteDataSet(cmd);
             }
         }
 
         /****************************************************************************/
         public DataSet ExecuteDataSet(Operation sp)
         {
-            return (ExecuteDataSet(sp.Command));
+            return ExecuteDataSet(sp.Command);
         }
 
         /****************************************************************************/
@@ -491,14 +500,14 @@ namespace Mondo.Database
             });
         }
 
-        #endregion
+        #endregion 
 
-        #region ExecuteForXml 
+        #region ExecuteForXml
 
         /****************************************************************************/
         public XmlDocument ExecuteForXml(Operation sp)
         {
-            return (ExecuteForXml(sp.Command));
+            return ExecuteForXml(sp.Command);
         }
 
         /****************************************************************************/
@@ -516,39 +525,65 @@ namespace Mondo.Database
             });
         }
 
-        #endregion
+        #endregion 
 
         /****************************************************************************/
-        public DBRow ExecuteSingleRow(string strSelect) { return (new DBRow(ExecuteDataTable(strSelect))); }
-        public DBRow ExecuteSingleRow(DbCommand cmd) { return (new DBRow(ExecuteDataTable(cmd))); }
-        public DBRow ExecuteSingleRow(Operation sp) { return (new DBRow(ExecuteDataTable(sp))); }
+        public DBRow ExecuteSingleRow(string strSelect)
+        {
+            return new DBRow(ExecuteDataTable(strSelect));
+        }
 
         /****************************************************************************/
-        public void ExecuteNonQuery(DbCommand cmd) { DoTask(cmd); }
-        public void ExecuteNonQuery(Operation sp) { DoTask(sp); }
-        public void ExecuteNonQuery(string strSQL) { DoTask(strSQL); }
+        public DBRow ExecuteSingleRow(DbCommand cmd)
+        {
+            return new DBRow(ExecuteDataTable(cmd));
+        }
+
+        /****************************************************************************/
+        public DBRow ExecuteSingleRow(Operation sp)
+        {
+            return new DBRow(ExecuteDataTable(sp));
+        }
+
+        /****************************************************************************/
+        public void ExecuteNonQuery(DbCommand cmd)
+        {
+            DoTask(cmd);
+        }
+
+        /****************************************************************************/
+        public void ExecuteNonQuery(Operation sp)
+        {
+            DoTask(sp);
+        }
+
+        /****************************************************************************/
+        public void ExecuteNonQuery(string strSQL)
+        {
+            DoTask(strSQL);
+        }
 
         #region ExecuteDataSourceList Methods
 
         /****************************************************************************/
         public DataSourceList ExecuteDataSourceList(string strSelect)
         {
-            return (new DBRowList(ExecuteDataTable(strSelect)));
+            return new DBRowList(ExecuteDataTable(strSelect));
         }
 
         /****************************************************************************/
         public DataSourceList ExecuteDataSourceList(Operation sp)
         {
-            return (new DBRowList(ExecuteDataTable(sp)));
+            return new DBRowList(ExecuteDataTable(sp));
         }
 
         /****************************************************************************/
         public DataSourceList ExecuteDataSourceList(DbCommand objCommand)
         {
-            return (new DBRowList(ExecuteDataTable(objCommand)));
+            return new DBRowList(ExecuteDataTable(objCommand));
         }
 
-        #endregion
+        #endregion ExecuteDataSourceList Methods
 
         #region ExecuteDataTable
 
@@ -557,14 +592,14 @@ namespace Mondo.Database
         {
             using (DbCommand objCommand = MakeSelectCommand(strSelect))
             {
-                return (ExecuteDataTable(objCommand));
+                return ExecuteDataTable(objCommand);
             }
         }
 
         /****************************************************************************/
         public DataTable ExecuteDataTable(Operation sp)
         {
-            return (ExecuteDataTable(sp.Command));
+            return ExecuteDataTable(sp.Command);
         }
 
         /****************************************************************************/
@@ -583,11 +618,11 @@ namespace Mondo.Database
                     objAdapter.Fill(dataTable);
                 }
 
-                return (dataTable);
+                return dataTable;
             });
         }
 
-        #endregion
+        #endregion ExecuteDataTable
 
         #region ExecuteList Methods
 
@@ -609,7 +644,7 @@ namespace Mondo.Database
             return ExecuteDataTable(objCommand).ToList<T>();
         }
 
-        #endregion
+        #endregion ExecuteList Methods
 
         #region Dictionary Methods
 
@@ -618,7 +653,7 @@ namespace Mondo.Database
         {
             using (DataTable dt = this.ExecuteDataTable(strSelect))
             {
-                return (ToDictionary(dt, idKeyField, idValueField, map));
+                return ToDictionary(dt, idKeyField, idValueField, map);
             }
         }
 
@@ -627,7 +662,7 @@ namespace Mondo.Database
         {
             using (DataTable dt = this.ExecuteDataTable(op))
             {
-                return (ToDictionary(dt, idKeyField, idValueField, map));
+                return ToDictionary(dt, idKeyField, idValueField, map);
             }
         }
 
@@ -738,7 +773,7 @@ namespace Mondo.Database
             return dict;
         }
 
-        #endregion
+        #endregion Dictionary Methods
 
         #region DoTask
 
@@ -820,7 +855,7 @@ namespace Mondo.Database
             return;
         }
 
-        #endregion
+        #endregion DoTask
 
         #region ExecuteXml
 
@@ -829,36 +864,36 @@ namespace Mondo.Database
         {
             using (DbCommand cmd = MakeSelectCommand(strSelect))
             {
-                return (ExecuteXml(cmd));
+                return ExecuteXml(cmd);
             }
         }
 
         /****************************************************************************/
         public XmlDocument ExecuteXml(Operation objProc)
         {
-            return (ExecuteXml(objProc.Command));
+            return ExecuteXml(objProc.Command);
         }
 
         /****************************************************************************/
         public XmlDocument ExecuteXml(DbCommand objCommand)
         {
             if (this.IsOpen)
-                return (XmlDoc.LoadXml(ExecuteDataSet(objCommand).GetXml()));
+                return XmlDoc.LoadXml(ExecuteDataSet(objCommand).GetXml());
 
             using (Acquire o = new Acquire(this))
-                return (ExecuteXml(objCommand));
+                return ExecuteXml(objCommand);
         }
 
         /****************************************************************************/
         public XmlDocument ExecuteXml(Operation objProc, string strDBName, IEnumerable aNames)
         {
-            return (ExecuteXml(objProc.Command, strDBName, aNames));
+            return ExecuteXml(objProc.Command, strDBName, aNames);
         }
 
         /****************************************************************************/
         public XmlDocument ExecuteXml(Operation objProc, IEnumerable aNames)
         {
-            return (ExecuteXml(objProc.Command, "", aNames));
+            return ExecuteXml(objProc.Command, "", aNames);
         }
 
         /****************************************************************************/
@@ -870,12 +905,12 @@ namespace Mondo.Database
                 {
                     LabelDataSet(dsData, strDBName, aNames);
 
-                    return (XmlDoc.LoadXml(dsData.GetXml()));
+                    return XmlDoc.LoadXml(dsData.GetXml());
                 }
             }
 
             using (Acquire o = new Acquire(this))
-                return (ExecuteXml(objCommand, strDBName, aNames));
+                return ExecuteXml(objCommand, strDBName, aNames);
         }
 
         /****************************************************************************/
@@ -907,33 +942,33 @@ namespace Mondo.Database
         {
             using (DbCommand cmd = MakeSelectCommand(strSelect))
             {
-                return (ExecuteXml(cmd, writer, type, bAttributes));
+                return ExecuteXml(cmd, writer, type, bAttributes);
             }
         }
 
         /****************************************************************************/
         public int ExecuteXml(Operation objProc, cXMLWriter writer, string type, bool bAttributes)
         {
-            return (ExecuteXml(objProc.Command, writer, type, bAttributes));
+            return ExecuteXml(objProc.Command, writer, type, bAttributes);
         }
 
         /****************************************************************************/
         public int ExecuteXml(DbCommand objCommand, cXMLWriter writer, string type, bool bAttributes)
         {
             if (this.IsOpen)
-                return (ToXml(ExecuteSelect(objCommand), writer, type, bAttributes));
+                return ToXml(ExecuteSelect(objCommand), writer, type, bAttributes);
 
             using (Acquire o = new Acquire(this))
-                return (ExecuteXml(objCommand, writer, type, bAttributes));
+                return ExecuteXml(objCommand, writer, type, bAttributes);
         }
 
         /****************************************************************************/
         public int ExecuteXml(string strSelect, cXMLWriter writer, string type)
         {
-            return (ExecuteXml(strSelect, writer, type, false));
+            return  ExecuteXml(strSelect, writer, type, false);
         }
 
-        #endregion
+        #endregion ExecuteXml
 
         #region ExecuteXPath
 
@@ -965,13 +1000,13 @@ namespace Mondo.Database
                 {
                     using (XmlReader xmlReader = new DbXmlReader(dbReader, strDBName, aNames))
                     {
-                        return (new XPathDocument(xmlReader));
+                        return new XPathDocument(xmlReader);
                     }
                 }
             }
 
             using (Acquire o = new Acquire(this))
-                return (ExecuteXPath(objCommand, strDBName, aNames));
+                return ExecuteXPath(objCommand, strDBName, aNames);
         }
 
         /****************************************************************************/
@@ -979,11 +1014,11 @@ namespace Mondo.Database
         {
             using (StringReader objReader = new StringReader(strXml))
             {
-                return (new XPathDocument(objReader));
+                return new XPathDocument(objReader);
             }
         }
 
-        #endregion
+        #endregion ExecuteXPath
 
         #region Secure String Methods
 
@@ -1035,7 +1070,7 @@ namespace Mondo.Database
             return (QuerySecureString(objProc.Command));
         }
 
-        #endregion
+        #endregion Secure String Methods
 
         #region QueryBinary
 
@@ -1076,7 +1111,7 @@ namespace Mondo.Database
             return (objResult as byte[]);
         }
 
-        #endregion
+        #endregion QueryBinary
 
         #region ExecuteScalar
 
@@ -1177,7 +1212,7 @@ namespace Mondo.Database
             });
         }
 
-        #endregion
+        #endregion ExecuteScalar
 
         #region Exceptions
 
@@ -1216,7 +1251,7 @@ namespace Mondo.Database
             }
         }
 
-        #endregion
+        #endregion Exceptions
 
         #region Utility Methods
 
@@ -1400,7 +1435,7 @@ namespace Mondo.Database
             }
         }
 
-        #endregion
+        #endregion Utility Methods
 
         #region Private Methods
 
@@ -1506,17 +1541,17 @@ namespace Mondo.Database
             }
         }
 
-        #endregion
+        #endregion Private Methods
     }
 
     /****************************************************************************/
     /****************************************************************************/
     /// <summary>
-	/// A connection to a SQL database
-	/// </summary>
-	public class SqlDatabase : Database
+    /// A connection to a SQL database
+    /// </summary>
+    public class SqlDatabase : Database
     {
-        private StringList m_aMessages = null;
+        private StringList _aMessages = null;
 
         /****************************************************************************/
         public SqlDatabase(IConfig config) : base(SqlClientFactory.Instance, config)
@@ -1533,13 +1568,13 @@ namespace Mondo.Database
         {
             if (this.IsOpen)
             {
-                m_aMessages = new StringList();
+                _aMessages = new StringList();
 
                 (this.Connection as SqlConnection).InfoMessage += new SqlInfoMessageEventHandler(Database_InfoMessage);
 
                 DataSet ds = base.ExecuteDataSet(cmd);
 
-                aMessages = m_aMessages;
+                aMessages = _aMessages;
 
                 return (ds);
             }
@@ -1549,6 +1584,7 @@ namespace Mondo.Database
         }
 
         /****************************************************************************/
+
         public DataSet ExecuteDataSet(string strSelect, out IList aMessages)
         {
             using (DbCommand cmd = MakeSelectCommand(strSelect))
@@ -1558,18 +1594,19 @@ namespace Mondo.Database
         }
 
         /****************************************************************************/
-        void Database_InfoMessage(object sender, SqlInfoMessageEventArgs e)
+
+        private void Database_InfoMessage(object sender, SqlInfoMessageEventArgs e)
         {
-            m_aMessages.Add(e.Message);
+            _aMessages.Add(e.Message);
         }
     }
 
     /****************************************************************************/
     /****************************************************************************/
     /// <summary>
-	/// A connection to an OLE DB database
-	/// </summary>
-	public class OleDbDatabase : Database
+    /// A connection to an OLE DB database
+    /// </summary>
+    public class OleDbDatabase : Database
     {
         /****************************************************************************/
         public OleDbDatabase(IConfig config) : base(System.Data.OleDb.OleDbFactory.Instance, config)
@@ -1585,9 +1622,9 @@ namespace Mondo.Database
     /****************************************************************************/
     /****************************************************************************/
     /// <summary>
-	/// A connection to an ODBC database
-	/// </summary>
-	public class OdbcDatabase : Database
+    /// A connection to an ODBC database
+    /// </summary>
+    public class OdbcDatabase : Database
     {
         /****************************************************************************/
         public OdbcDatabase(IConfig config) : base(System.Data.Odbc.OdbcFactory.Instance, config)
