@@ -81,6 +81,32 @@ namespace Mondo.Common
         }
 
         /****************************************************************************/
+        public static string Pack<K, V>(this IDictionary<K, V> values, string separator1 = ",", string separator2 = ";", Func<V, string> fn = null)
+        {
+            StringBuilder sb = new StringBuilder();
+
+            foreach(K key in values.Keys)
+            {
+                var value  = values[key];
+                var sValue = "";
+
+                if(fn != null)
+                    sValue = fn(value);
+                else
+                    sValue = value.ToString();
+
+                if(sb.Length != 0)
+                    sb.Append(separator2);
+
+                sb.Append(key);
+                sb.Append(separator1);
+                sb.Append(sValue);
+            }
+   
+            return(sb.ToString());
+        }
+
+        /****************************************************************************/
         private static XmlNode GetFormNode(StringList parts, int index, XmlNode parent, Dictionary<string, string> pluralTransforms = null)
         {
             XmlNode node  = parent;
