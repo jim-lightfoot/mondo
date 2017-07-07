@@ -1,4 +1,23 @@
-﻿using System;
+﻿/****************************************************************************/
+/*                                                                          */
+/*    The Mondo Libraries                                                   */
+/*                                                                          */
+/*        Namespace: Mondo.Common                                           */
+/*             File: CollectionExtensions.cs                                */
+/*        Class(es): CollectionExtensions                                   */
+/*          Purpose: Extension methods for various collection types         */
+/*                                                                          */
+/*  Original Author: Jim Lightfoot                                          */
+/*    Creation Date: 4 Mar 2014                                             */
+/*                                                                          */
+/*   Copyright (c) 2014-2016 - Jim Lightfoot, All rights reserved           */
+/*                                                                          */
+/*  Licensed under the MIT license:                                         */
+/*    http://www.opensource.org/licenses/mit-license.php                    */
+/*                                                                          */
+/****************************************************************************/
+
+using System;
 using System.Collections.Specialized;
 using System.Collections.Generic;
 using System.Linq;
