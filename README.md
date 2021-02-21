@@ -1,5 +1,7 @@
 # The Mondo Libraries
 
+<b>This repo is deprecated and no longer maintained. Some of the classes have been ported to MondoCore which are .Net Standard and can be used by any version of .Net including .Net Core and .Net 5. If there any classes here that have not been ported but you would like to use drop an issue on the MondoCore repo</b>
+
 ## Mondo.Common
   A collection of useful classes for everyday .Net development.
   
